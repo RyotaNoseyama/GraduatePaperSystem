@@ -1,8 +1,8 @@
-import { TaskPageContent } from './task-page-content';
+import { FeedbackPage } from "@/components/task/feedback-page";
 
-export const dynamic = 'force-dynamic';
-export const runtime = 'nodejs';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export default function TaskPage() {
-  return <TaskPageContent />;
+  return <FeedbackPage />;
 }

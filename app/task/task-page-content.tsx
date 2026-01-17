@@ -1,31 +1,18 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Instructions } from "@/components/task/instructions";
 import { CaptionForm } from "@/components/task/caption-form";
-import { FeedbackPanel } from "@/components/task/feedback-panel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle } from "lucide-react";
-import { HistogramData, GoalData } from "@/lib/feedback-data";
-import {
-  GroupInfo,
-  getGroupMessage,
-  shouldShowAnyFeedback,
-} from "@/lib/group-utils";
-
-interface FeedbackDataResponse {
-  histogram: HistogramData | null;
-  goal: GoalData | null;
-  groupInfo: GroupInfo | null;
-}
+import { AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
+import { GroupInfo, getGroupMessage } from "@/lib/group-utils";
+import { Button } from "@/components/ui/button";
 
 export function TaskPageContent() {
   const searchParams = useSearchParams();
-  const [feedbackData, setFeedbackData] = useState<FeedbackDataResponse | null>(
-    null
-  );
+  const router = useRouter();
   const [completionCode, setCompletionCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
@@ -39,27 +26,11 @@ export function TaskPageContent() {
   const isPreview = assignmentId === "ASSIGNMENT_ID_NOT_AVAILABLE";
   const imageUrl = process.env.NEXT_PUBLIC_TODAY_IMAGE_URL_A || "";
 
-  useEffect(() => {
-    const fetchFeedback = async () => {
-      try {
-        const response = await fetch(`/api/feedback?workerId=${workerId}`);
-        const data = await response.json();
-        console.log("Frontend received feedback data:", data);
-        setFeedbackData(data);
-
-        // フィードバックAPIからgroupInfoを取得
-        if (data.groupInfo) {
-          setGroupInfo(data.groupInfo);
-        }
-      } catch (err) {
-        console.error("Failed to load feedback:", err);
-      }
-    };
-
-    if (workerId) {
-      fetchFeedback();
-    }
-  }, [workerId]);
+  const handleBackToFeedback = () => {
+    const params = searchParams.toString();
+    const url = params ? `/task?${params}` : "/task";
+    router.push(url);
+  };
 
   const handleSubmit = async (caption: string, rtMs: number) => {
     setError(null);
@@ -92,7 +63,7 @@ export function TaskPageContent() {
       // 警告がある場合（類似度が高い場合）の処理
       if (data.warning) {
         setWarning(
-          "Your submission has been saved, but it was flagged as similar to existing submissions. No completion code will be provided."
+          "Your submission has been saved, but it was flagged as similar to existing submissions. No completion code will be provided.",
         );
         setHasSubmitted(true);
         return;
@@ -206,10 +177,11 @@ export function TaskPageContent() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Image Caption Task
+            Website UI/UX Review
           </h1>
           <p className="text-slate-600">
-            Write a detailed caption for the image below
+            Interact with the site and report Concrete Improvements and User
+            Psychology
           </p>
         </div>
 
@@ -231,43 +203,22 @@ export function TaskPageContent() {
           </Alert>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <Instructions groupInfo={groupInfo} />
-            <CaptionForm
-              onSubmit={handleSubmit}
-              disabled={isPreview}
-              imageUrl={imageUrl}
-            />
+        <div className="space-y-6">
+          <Instructions groupInfo={groupInfo} />
+          <div className="mb-6">
+            <Button
+              onClick={handleBackToFeedback}
+              className="mb-4 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Feedback
+            </Button>
           </div>
-
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              {(() => {
-                console.log("TaskPageContent - feedbackData:", feedbackData);
-                console.log("TaskPageContent - groupInfo:", groupInfo);
-                console.log(
-                  "TaskPageContent - shouldShowAnyFeedback:",
-                  groupInfo
-                    ? shouldShowAnyFeedback(groupInfo.cond)
-                    : "no groupInfo"
-                );
-
-                return (
-                  feedbackData &&
-                  (feedbackData.histogram || feedbackData.goal) &&
-                  groupInfo &&
-                  shouldShowAnyFeedback(groupInfo.cond) && (
-                    <FeedbackPanel
-                      histogram={feedbackData.histogram}
-                      goal={feedbackData.goal}
-                      cond={groupInfo.cond}
-                    />
-                  )
-                );
-              })()}
-            </div>
-          </div>
+          <CaptionForm
+            onSubmit={handleSubmit}
+            disabled={isPreview}
+            imageUrl={imageUrl}
+          />
         </div>
       </div>
     </div>

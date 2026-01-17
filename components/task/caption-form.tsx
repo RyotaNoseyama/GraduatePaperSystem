@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,25 @@ export function CaptionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startTime] = useState(Date.now());
   const [showCaptionError, setShowCaptionError] = useState(false);
+  const [interactions, setInteractions] = useState<any[]>([]);
+
+  // 埋め込みアプリからのpostMessageを受信
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // セキュリティ: 同一オリジンのみ許可（必要に応じて調整）
+      if (event.origin !== window.location.origin) return;
+
+      const { type, ...data } = event.data;
+
+      if (type === "SCROLL" || type === "CLICK") {
+        console.log("Interaction received:", type, data);
+        setInteractions((prev) => [...prev, { type, ...data }]);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   const isValidLength = (text: string) =>
     isValidNonWhitespaceLength(text, MIN_LENGTH, MAX_LENGTH);
@@ -52,6 +71,11 @@ export function CaptionForm({
     setIsSubmitting(true);
     try {
       const rtMs = Date.now() - startTime;
+
+      // インタラクションデータをログ出力（将来的にAPIに送信可能）
+      console.log("Total interactions recorded:", interactions.length);
+      console.log("Interaction data:", interactions);
+
       await onSubmit(caption, rtMs);
     } catch (error) {
       console.error("Submission error:", error);

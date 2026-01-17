@@ -1,9 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  GroupInfo,
-  shouldShowGroupGoals,
-  shouldShowIndividualRanking,
-} from "@/lib/group-utils";
+import { GroupInfo } from "@/lib/group-utils";
 
 interface InstructionsProps {
   groupInfo?: GroupInfo | null;
@@ -17,63 +13,83 @@ export function Instructions({ groupInfo }: InstructionsProps) {
           Task Instructions
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 text-slate-700 leading-relaxed">
-        <p>
-          Please write a <strong>caption</strong> for the image below. In this
-          caption, describe the{" "}
-          <strong>positional relationships and detailed situations</strong>{" "}
-          logically and carefully so that{" "}
-          <strong>visually impaired people</strong> can specifically imagine the
-          content of the image. You cannot submit unless it is{" "}
-          <strong>at least 30 characters long</strong>.
-        </p>
-        <p>
-          This experiment will be conducted continuously for{" "}
-          <strong>one week</strong>. Tasks will be published daily from{" "}
-          <strong>9 AM to 9 PM America time</strong>.
-        </p>
+      <CardContent className="space-y-6 text-slate-700 leading-relaxed">
+        <section className="space-y-2">
+          <h4 className="font-semibold text-slate-900">Overview</h4>
+          <p>
+            Act as a professional <strong>UI/UX Consultant</strong>. Interact
+            with the displayed website, identify issues, and report{" "}
+            <em>Concrete Improvements</em>
+            and <em>User Psychology</em>.
+          </p>
+        </section>
 
-        {/* Group-specific goal display */}
-        {groupInfo && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-            <h4 className="font-semibold text-blue-900 mb-2">
-              Experiment Goal
-            </h4>
-            {shouldShowGroupGoals(groupInfo.cond) &&
-              shouldShowIndividualRanking(groupInfo.cond) && (
-                <p className="text-blue-800 text-sm">
-                  <strong>
-                    Group Goal: Collect 80+ responses with 8+ points within one
-                    week.
-                  </strong>{" "}
-                  Your individual position will also be displayed, so please
-                  participate actively!
-                </p>
-              )}
-            {shouldShowGroupGoals(groupInfo.cond) &&
-              !shouldShowIndividualRanking(groupInfo.cond) && (
-                <p className="text-blue-800 text-sm">
-                  <strong>
-                    Group Goal: Collect 80+ responses with 8+ points within one
-                    week.
-                  </strong>{" "}
-                  Let&apos;s work together as a team to achieve this goal!
-                </p>
-              )}
-            {!shouldShowGroupGoals(groupInfo.cond) &&
-              shouldShowIndividualRanking(groupInfo.cond) && (
-                <p className="text-blue-800 text-sm">
-                  <strong>Your individual position</strong> will be displayed.{" "}
-                  Please use the comparison with other participants as a
-                  reference to create high-quality captions!
-                </p>
-              )}
+        <section className="space-y-2">
+          <h4 className="font-semibold text-slate-900">Schedule</h4>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              Tasks will be published daily from{" "}
+              <strong>9 AM to 9 PM (US Time)</strong>.
+            </li>
+            <li>
+              A new task will be released every day for the next
+              <strong> 7 days starting today</strong>.
+            </li>
+          </ul>
+        </section>
+
+        <section className="space-y-3">
+          <h4 className="font-semibold text-slate-900">Instructions</h4>
+          <div className="space-y-2">
+            <h5 className="font-medium text-slate-900">
+              Interact with the Website
+            </h5>
+            <p>
+              Click buttons and type text to navigate the site. Find specific
+              points where users might struggle or get frustrated.
+            </p>
           </div>
-        )}
 
-        <p>
-          <strong>Avoid personal data and offensive language.</strong>
-        </p>
+          <div className="space-y-2">
+            <h5 className="font-medium text-slate-900">Submit Your Report</h5>
+            <p>Please provide the following two points:</p>
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>
+                <strong>Improvement (Theory):</strong> Specifically what and how
+                to fix.
+                <span className="block text-sm text-slate-600">
+                  e.g., "Change text color to black (#000)", "Move the button to
+                  the top".
+                </span>
+              </li>
+              <li>
+                <strong>User Insight:</strong> In what situation and how would
+                the user feel?
+                <span className="block text-sm text-slate-600">
+                  e.g., "If this error occurs while in a rush, the user would
+                  panic".
+                </span>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <h4 className="font-semibold text-slate-900">Important Notes</h4>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong>
+                AI-generated text and copy-pasting are strictly prohibited.
+              </strong>
+              Detected cases will be rejected, and you will be blocked from
+              future tasks.
+            </li>
+            <li>
+              <strong>Contradictory or meaningless feedback</strong> will result
+              in rejection.
+            </li>
+          </ul>
+        </section>
       </CardContent>
     </Card>
   );
