@@ -57,7 +57,7 @@ export function getCurrentDayIdx(): number {
   const etNow = getETDate(now);
   const etMidnight = getETMidnight(etNow);
   const daysSinceEpoch = Math.floor(
-    etMidnight.getTime() / (24 * 60 * 60 * 1000)
+    etMidnight.getTime() / (24 * 60 * 60 * 1000),
   );
   return daysSinceEpoch;
 }
@@ -77,7 +77,8 @@ export function generateCompletionCode(): string {
 
   // 真ん中の文字（7文字目、ハイフンを含めると8文字目）を'S'に固定
   const codeArray = code.split("");
-  codeArray[6] = "S"; // XXXX-XXSX-XXXX の S
+  codeArray[12] = "A"; // XXXX-XXSX-XXAX の A
+  codeArray[13] = "B"; // XXXX-XXXX-XXXB の B
 
   return `COMP-${codeArray.join("")}`;
 }

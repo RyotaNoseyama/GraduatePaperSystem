@@ -75,27 +75,28 @@ export function CaptionForm({
 
   // taskNumberに応じたコンポーネントを取得
   const getDayComponent = useCallback(() => {
-    const dayNum = taskNumber;
-    switch (dayNum) {
-      case 0:
-        return <Day0Page />;
-      case 1:
-        return <Day1Page />;
-      case 2:
-        return <Day2Page />;
-      case 3:
-        return <Day3Page />;
-      case 4:
-        return <Day4Page />;
-      case 5:
-        return <Day5Page />;
-      case 6:
-        return <Day6Page />;
-      case 7:
-        return <Day7Page />;
-      default:
-        return <Loading />;
-    }
+    return <Day0Page />;
+    // const dayNum = taskNumber;
+    // switch (dayNum) {
+    //   case 0:
+    //     return <Day0Page />;
+    //   case 1:
+    //     return <Day1Page />;
+    //   case 2:
+    //     return <Day2Page />;
+    //   case 3:
+    //     return <Day3Page />;
+    //   case 4:
+    //     return <Day4Page />;
+    //   case 5:
+    //     return <Day5Page />;
+    //   case 6:
+    //     return <Day6Page />;
+    //   case 7:
+    //     return <Day7Page />;
+    //   default:
+    //     return <Loading />;
+    // }
   }, [taskNumber, defaultTask]);
 
   const isValidLength = (text: string) =>
