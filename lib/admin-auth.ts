@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
+import { NextRequest } from "next/server";
 
 // シンプルなハッシュ化とハッシュ検証
 
@@ -29,7 +30,9 @@ export async function verifyPassword(
 }
 
 const getSecretKey = () =>
-  new TextEncoder().encode(process.env.JWT_SECRET || "your-secret-key");
+  new TextEncoder().encode(
+    process.env.JWT_SECRET || process.env.ADMIN_JWT_SECRET || "your-secret-key",
+  );
 
 export async function generateJWT(adminId: string): Promise<string> {
   return await new SignJWT({ adminId })
@@ -47,6 +50,19 @@ export async function verifyJWT(
     if (!payload.adminId) return null;
     return { adminId: payload.adminId as string };
   } catch (error) {
+    return null;
+  }
+}
+
+// Next.js API Route向けの管理者トークン検証ヘルパー
+export async function verifyAdminToken(
+  request: NextRequest,
+): Promise<{ adminId: string } | null> {
+  try {
+    const token = request.cookies.get("adminToken")?.value;
+    if (!token) return null;
+    return await verifyJWT(token);
+  } catch {
     return null;
   }
 }

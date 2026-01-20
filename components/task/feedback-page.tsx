@@ -8,11 +8,16 @@ import { Button } from "@/components/ui/button";
 export function FeedbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [feedbackStartTime] = useState(Date.now()); // FBページ開始時刻
 
   const handleGoToAnswer = () => {
+    // FBページの滞在時間を計算
+    const feedbackTimeMs = Date.now() - feedbackStartTime;
+    
     // 現在のクエリパラメータを保持して遷移
     const params = searchParams.toString();
-    const url = params ? `/task/answer?${params}` : "/task/answer";
+    const separator = params ? "&" : "?";
+    const url = `/task/answer${params ? "?" + params : ""}${separator}feedbackTimeMs=${feedbackTimeMs}`;
     router.push(url);
   };
 

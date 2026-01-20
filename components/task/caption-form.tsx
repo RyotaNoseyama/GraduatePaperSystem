@@ -6,24 +6,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ImageDisplay } from "./image-display";
-import {
-  countNonWhitespaceCharacters,
-  isValidNonWhitespaceLength,
-} from "@/lib/text-utils";
+import { countWords, isValidWordCount } from "@/lib/text-utils";
+import Day1Page from "@/app/embedded-app/page";
 
 interface CaptionFormProps {
   onSubmit: (caption: string, rtMs: number) => Promise<void>;
   disabled?: boolean;
   imageUrl?: string;
+  pageStartTime?: number;
 }
 
-const MIN_LENGTH = 30;
-const MAX_LENGTH = 1000;
+const MIN_WORDS = 20;
+const MAX_WORDS = 500;
 
 export function CaptionForm({
   onSubmit,
   disabled,
   imageUrl,
+  pageStartTime,
 }: CaptionFormProps) {
   const [caption, setCaption] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,10 +50,9 @@ export function CaptionForm({
   }, []);
 
   const isValidLength = (text: string) =>
-    isValidNonWhitespaceLength(text, MIN_LENGTH, MAX_LENGTH);
+    isValidWordCount(text, MIN_WORDS, MAX_WORDS);
   const isTooShort = (text: string) =>
-    countNonWhitespaceCharacters(text) > 0 &&
-    countNonWhitespaceCharacters(text) < MIN_LENGTH;
+    countWords(text) > 0 && countWords(text) < MIN_WORDS;
   const canSubmit = isValidLength(caption) && !disabled && !isSubmitting;
 
   const handleCaptionBlur = () => {
@@ -87,15 +86,16 @@ export function CaptionForm({
     <Card className="border-slate-200">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-slate-900">
-          Write Your Caption
+          Write Your UI/UX Review
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 画像表示エリア */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium text-slate-700">Image</Label>
-            <ImageDisplay imageUrl={imageUrl} />
+          <div className="space-y-2 border border-black">
+            {/* <Label className="text-sm font-medium text-slate-700">Image</Label> */}
+            {/* <ImageDisplay imageUrl={imageUrl} /> */}
+            <Day1Page></Day1Page>
           </div>
 
           <div className="space-y-2">
@@ -104,14 +104,14 @@ export function CaptionForm({
                 htmlFor="caption"
                 className="text-sm font-medium text-slate-700"
               >
-                Caption
+                UI/UX Review
               </Label>
               <span
                 className={`text-xs ${
                   isValidLength(caption) ? "text-green-600" : "text-slate-500"
                 }`}
               >
-                {countNonWhitespaceCharacters(caption)} / {MIN_LENGTH} chars
+                {countWords(caption)} / {MIN_WORDS} words
               </span>
             </div>
             <Textarea
@@ -119,19 +119,19 @@ export function CaptionForm({
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               onBlur={handleCaptionBlur}
-              placeholder="Write a detailed description of the image..."
-              className={`min-h-[120px] resize-none focus:ring-slate-400 ${
+              placeholder="Write your UI/UX review of the upper website..."
+              className={`min-h-[240px] resize-none focus:ring-slate-400 ${
                 isTooShort(caption)
                   ? "border-red-400 focus:border-red-500"
                   : "border-slate-300 focus:border-slate-400"
               }`}
               disabled={disabled || isSubmitting}
-              maxLength={MAX_LENGTH}
+              maxLength={MAX_WORDS}
             />
             {showCaptionError && (
               <p className="text-red-500 text-xs mt-1">
-                Caption needs at least {MIN_LENGTH} characters (excluding
-                spaces). Current: {countNonWhitespaceCharacters(caption)}
+                Review needs at least {MIN_WORDS} words. Current:{" "}
+                {countWords(caption)}
               </p>
             )}
           </div>
@@ -141,7 +141,7 @@ export function CaptionForm({
             disabled={!canSubmit}
             className="w-full bg-slate-700 hover:bg-slate-800 text-white disabled:bg-slate-300 disabled:text-slate-500"
           >
-            {isSubmitting ? "Submitting..." : "Submit Caption"}
+            {isSubmitting ? "Submitting..." : "Submit Review"}
           </Button>
         </form>
       </CardContent>

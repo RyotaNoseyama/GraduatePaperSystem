@@ -1,95 +1,182 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { AlertTriangle, MapPin, Phone, Map, Navigation } from "lucide-react";
 
-export default function EmbeddedAppPage() {
-  const [scrollY, setScrollY] = useState(0);
-  const [clickCount, setClickCount] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const newScrollY = window.scrollY;
-      setScrollY(newScrollY);
-
-      // 親ウィンドウにスクロール情報を送信
-      window.parent.postMessage(
-        {
-          type: "SCROLL",
-          scrollY: newScrollY,
-          timestamp: Date.now(),
-        },
-        "*"
-      );
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const handleClick = (itemIndex: number) => {
-    setClickCount((prev) => prev + 1);
-
-    // 親ウィンドウにクリック情報を送信
-    window.parent.postMessage(
-      {
-        type: "CLICK",
-        itemIndex,
-        clickCount: clickCount + 1,
-        timestamp: Date.now(),
-      },
-      "*"
-    );
-  };
-
+export default function Day1Page() {
   return (
-    <div className="min-h-[200vh] p-6 bg-gradient-to-b from-blue-50 via-purple-50 to-pink-50">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="bg-white rounded-lg shadow-lg p-6 sticky top-0 z-10 border-b-4 border-blue-500">
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">
-            インタラクティブWebアプリケーション
-          </h1>
-          <div className="flex gap-4 text-sm text-slate-600">
+    <div className="min-h-screen bg-white">
+      {/* Official-looking Header - This looks GOOD (the trap) */}
+      <header className="bg-slate-900 text-white px-6 py-4">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6" />
             <div>
-              <span className="font-semibold">スクロール:</span> {scrollY}px
+              <h1 className="text-lg font-semibold">NEMA</h1>
+              <p className="text-xs text-slate-300">
+                National Emergency Management Agency
+              </p>
             </div>
-            <div>
-              <span className="font-semibold">クリック数:</span> {clickCount}
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-slate-400">Last Updated</p>
+            <p className="text-sm">Jan 19, 2026 • 3:47 PM</p>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content - Aesthetic over Function */}
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        {/* Status Badge - Soft gray instead of red (bad design) */}
+        <div className="mb-8">
+          <span className="inline-block px-4 py-1.5 bg-gray-100 text-gray-400 text-xs font-medium rounded-full">
+            Status: CRITICAL
+          </span>
+        </div>
+
+        {/* Main Title - Elegant but too thin and light */}
+        <h2 className="text-4xl font-light text-gray-400 mb-6 leading-tight">
+          Hurricane Omega: Evacuation Mandate Effective Immediately
+        </h2>
+
+        {/* Sub-info - Treated as "secondary" text */}
+        <div className="space-y-3 mb-12">
+          <p className="text-sm text-gray-200 font-light">
+            Affected Areas: Metro City, Coastal Districts 1-4
+          </p>
+          <p className="text-sm text-[#E5E5E5] font-light">
+            A Category 5 Hurricane is making landfall. Storm surge of 15-20 feet
+            expected. Residents must evacuate to designated shelters immediately.
+          </p>
+        </div>
+
+        {/* Designated Shelters - The TRAP: tiny text for critical info */}
+        <div className="mb-12">
+          <h3 className="text-lg font-light text-gray-400 mb-6">
+            Designated Shelters
+          </h3>
+
+          <div className="space-y-8">
+            {/* Shelter 1 - Tiny, pale text */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-gray-200 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <p className="text-[10px] text-gray-200 font-light">
+                    Lincoln High School Gymnasium
+                  </p>
+                  <p className="text-[10px] text-[#E5E5E5] font-light">
+                    1234 Education Blvd., Metro City, FL 33101
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3 h-3 text-[#E5E5E5]" />
+                    <p className="text-[10px] text-[#E5E5E5] font-light">
+                      (555) 789-0123
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-gray-200 font-light">
+                    Capacity: 500 • Wheelchair Accessible • Pet-Friendly
+                  </p>
+                </div>
+                {/* Ghost Buttons - No border, pale text */}
+                <div className="flex gap-2">
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Call
+                  </button>
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Map
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Shelter 2 - Tiny, pale text */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-gray-200 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <p className="text-[10px] text-gray-200 font-light">
+                    Westside Community Center
+                  </p>
+                  <p className="text-[10px] text-[#E5E5E5] font-light">
+                    5678 Oak St., Metro City, FL 33102
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3 h-3 text-[#E5E5E5]" />
+                    <p className="text-[10px] text-[#E5E5E5] font-light">
+                      (555) 789-0456
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-gray-200 font-light">
+                    Capacity: 350 • Wheelchair Accessible • Medical Staff On-Site
+                  </p>
+                </div>
+                {/* Ghost Buttons */}
+                <div className="flex gap-2">
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Call
+                  </button>
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Map
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Shelter 3 - Tiny, pale text */}
+            <div className="space-y-2">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-gray-200 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <p className="text-[10px] text-gray-200 font-light">
+                    Veterans Memorial Hall
+                  </p>
+                  <p className="text-[10px] text-[#E5E5E5] font-light">
+                    999 Freedom Way, Metro City, FL 33103
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="w-3 h-3 text-[#E5E5E5]" />
+                    <p className="text-[10px] text-[#E5E5E5] font-light">
+                      (555) 789-0789
+                    </p>
+                  </div>
+                  <p className="text-[9px] text-gray-200 font-light">
+                    Capacity: 450 • Wheelchair Accessible • Generator Power
+                  </p>
+                </div>
+                {/* Ghost Buttons */}
+                <div className="flex gap-2">
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Call
+                  </button>
+                  <button className="text-[10px] text-gray-300 font-light px-3 py-1.5 hover:text-gray-400 transition-colors">
+                    Map
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-          {Array.from({ length: 30 }).map((_, i) => (
-            <div
-              key={i}
-              onClick={() => handleClick(i)}
-              className="p-6 bg-white rounded-lg shadow hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500 hover:border-pink-500"
-            >
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                コンテンツアイテム {i + 1}
-              </h3>
-              <p className="text-slate-600">
-                このアイテムをクリックすると、親ページにイベントが送信されます。
-                スクロール位置も自動的に記録されています。
-              </p>
-              <div className="mt-3 flex gap-2">
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                  Item #{i + 1}
-                </span>
-                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                  Interactive
-                </span>
-              </div>
-            </div>
-          ))}
+        {/* Additional Instructions - Minimal contrast */}
+        <div className="border-t border-gray-100 pt-8 mt-12">
+          <h3 className="text-sm font-light text-gray-400 mb-4">
+            Evacuation Guidelines
+          </h3>
+          <ul className="space-y-2 text-xs text-[#E5E5E5] font-light">
+            <li>Bring identification, medications, and emergency supplies</li>
+            <li>Do not drive through flooded areas</li>
+            <li>Monitor local news for real-time updates</li>
+            <li>Follow designated evacuation routes only</li>
+          </ul>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-2">最後までスクロールしました！</h2>
-          <p className="text-blue-100">
-            すべてのインタラクションが記録されています
+        {/* Footer - Minimalist */}
+        <footer className="mt-16 pt-6 border-t border-gray-50">
+          <p className="text-[10px] text-gray-300 text-center font-light">
+            National Emergency Management Agency • In partnership with NOAA &
+            National Weather Service
           </p>
-        </div>
+        </footer>
       </div>
     </div>
   );

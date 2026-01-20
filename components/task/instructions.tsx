@@ -24,7 +24,16 @@ export function Instructions({ groupInfo }: InstructionsProps) {
           </p>
         </section>
 
+        {/* 回答が良かったら、報酬がさらに多いタスクに招待されますというセンテンスを追加 */}
         <section className="space-y-2">
+          <h4 className="font-semibold text-slate-900">Rewards</h4>
+          <p>
+            If your review is particularly insightful and helpful, you may be
+            invited to participate in tasks with higher rewards.
+          </p>
+        </section>
+
+        {/* <section className="space-y-2">
           <h4 className="font-semibold text-slate-900">Schedule</h4>
           <ul className="list-disc pl-5 space-y-1">
             <li>
@@ -36,7 +45,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
               <strong> 7 days starting today</strong>.
             </li>
           </ul>
-        </section>
+        </section> */}
 
         <section className="space-y-3">
           <h4 className="font-semibold text-slate-900">Instructions</h4>
@@ -50,7 +59,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
             </p>
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <h5 className="font-medium text-slate-900">Submit Your Report</h5>
             <p>Please provide the following two points:</p>
             <ol className="list-decimal pl-5 space-y-2">
@@ -71,7 +80,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
                 </span>
               </li>
             </ol>
-          </div>
+          </div> */}
         </section>
 
         <section className="space-y-2">

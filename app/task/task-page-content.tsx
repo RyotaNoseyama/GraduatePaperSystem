@@ -36,6 +36,10 @@ export function TaskPageContent() {
     setError(null);
     setWarning(null);
     try {
+      // FBページ（/task）の滞在時間をクエリパラメータから取得
+      const feedbackTimeMs = searchParams.get("feedbackTimeMs");
+      const fbTime = feedbackTimeMs ? parseInt(feedbackTimeMs) : 0;
+
       const response = await fetch("/api/submissions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +48,7 @@ export function TaskPageContent() {
           assignmentId,
           hitId,
           caption,
-          rtMs,
+          rtMs: fbTime, // FBページ（/task）の滞在時間のみを送信
         }),
       });
 
@@ -60,13 +64,11 @@ export function TaskPageContent() {
         setGroupInfo(data.groupInfo);
       }
 
-      // 警告がある場合（類似度が高い場合）の処理
-      if (data.warning) {
+      // 類似度が高い場合の警告（コードは発行される）
+      if (data.isSimilar) {
         setWarning(
-          "Your submission has been saved, but it was flagged as similar to existing submissions. No completion code will be provided.",
+          "Your submission was flagged as similar to existing submissions, but has been recorded.",
         );
-        setHasSubmitted(true);
-        return;
       }
 
       setCompletionCode(data.completionCode);
@@ -90,33 +92,6 @@ export function TaskPageContent() {
     );
   }
 
-  if (hasSubmitted && warning) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <Card className="max-w-md border-amber-200 bg-amber-50">
-          <CardContent className="pt-6 text-center space-y-4">
-            <AlertCircle className="mx-auto h-16 w-16 text-amber-600" />
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Submission Flagged
-            </h2>
-            <p className="text-slate-700 leading-relaxed">
-              Your submission has been saved but was flagged as similar to
-              existing submissions.
-            </p>
-            <div className="bg-white border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-700">
-                No completion code will be provided for this submission.
-              </p>
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Please ensure your caption is original and unique.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   if (hasSubmitted && completionCode) {
     const groupMessage = groupInfo ? getGroupMessage(groupInfo) : null;
 
@@ -132,26 +107,14 @@ export function TaskPageContent() {
               Your caption has been submitted successfully.
             </p>
 
-            {/* グループメッセージ */}
-            {/* {groupMessage && (
-              <div
-                className={`border rounded-lg p-4 ${
-                  groupMessage.color === "blue"
-                    ? "bg-blue-50 border-blue-200"
-                    : groupMessage.color === "green"
-                    ? "bg-green-50 border-green-200"
-                    : groupMessage.color === "purple"
-                    ? "bg-purple-50 border-purple-200"
-                    : groupMessage.color === "orange"
-                    ? "bg-orange-50 border-orange-200"
-                    : "bg-gray-50 border-gray-200"
-                }`}
-              >
-                <h3 className="font-semibold text-slate-900 mb-2">
-                  {groupMessage.title}
-                </h3>
-                <p className="text-sm text-slate-700">{groupMessage.message}</p>
-              </div>
+            {/* 類似度警告 */}
+            {/* {warning && (
+              <Alert className="border-amber-200 bg-amber-50">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <AlertDescription className="text-amber-900">
+                  {warning}
+                </AlertDescription>
+              </Alert>
             )} */}
 
             <div className="bg-white border border-slate-200 rounded-lg p-4">

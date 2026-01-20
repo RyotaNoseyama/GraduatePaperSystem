@@ -15,7 +15,6 @@ model Participant {
   consentAt        DateTime? @map("consent_at")
 
   submissions Submission[]
-  scores      Score[]  @relation("ParticipantScores")
 
   @@map("participants")
 }
@@ -32,33 +31,19 @@ model Submission {
   id             String   @id @default(cuid())
   workerId       String   @map("worker_id")
   dayIdx         Int      @map("day_idx")
-  captionA       String   @map("caption_a")
+  taskNumber     Int?     @map("task_number")
+  answer         String   @db.Text
+  feedback       String?  @db.Text
   scoreA         Int?     @map("score_a")
-  score          Int?
+  scoreB         Int?     @map("score_b")
   rtMs           Int?     @map("rt_ms")
   completionCode String?  @map("completion_code")
   submittedAt    DateTime? @default(now()) @map("submitted_at")
 
   participant Participant @relation(fields: [workerId], references: [workerId])
-  scoreRelation Score?   @relation("SubmissionScore")
 
   @@unique([workerId, dayIdx])
   @@map("submissions")
-}
-
-model Score {
-  id            String   @id @default(cuid())
-  submissionId  String   @unique @map("submission_id")
-  workerId      String   @map("worker_id")
-  score         Int
-  is7plus       Boolean  @default(false) @map("is_7plus")
-  scoredAt      DateTime @default(now()) @map("scored_at")
-  scorer        String?
-
-  submission    Submission @relation("SubmissionScore", fields: [submissionId], references: [id])
-  participant   Participant @relation("ParticipantScores", fields: [workerId], references: [workerId])
-
-  @@map("scores")
 }
 
 model GroupGoal {

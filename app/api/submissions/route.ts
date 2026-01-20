@@ -2,13 +2,61 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentDayIdx, generateCompletionCode } from "@/lib/date-utils";
 import { calculateWERSimilarity } from "@/lib/wer-similarity";
-import { isValidNonWhitespaceLength } from "@/lib/text-utils";
+import { isValidWordCount } from "@/lib/text-utils";
+import { verifyAdminToken } from "@/lib/admin-auth";
 
-const MIN_LENGTH = 30;
-const MAX_LENGTH = 1000;
+const MIN_WORDS = 20;
+const MAX_WORDS = 500;
 const SIMILARITY_THRESHOLD = 0.8; // 8割の類似度閾値
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Get all submissions (Admin only)
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // 管理者認証チェック
+    const adminPayload = await verifyAdminToken(request);
+    if (!adminPayload) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const dayIdx = searchParams.get("dayIdx");
+    const workerId = searchParams.get("workerId");
+
+    const where: any = {};
+    if (dayIdx) {
+      where.dayIdx = parseInt(dayIdx);
+    }
+    if (workerId) {
+      where.workerId = workerId;
+    }
+
+    const submissions = await prisma.submission.findMany({
+      where,
+      include: {
+        participant: true,
+      },
+      orderBy: {
+        submittedAt: "desc",
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      submissions,
+      total: submissions.length,
+    });
+  } catch (error) {
+    console.error("Get submissions error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch submissions" },
+      { status: 500 },
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,25 +66,25 @@ export async function POST(request: NextRequest) {
     if (assignmentId === "ASSIGNMENT_ID_NOT_AVAILABLE") {
       return NextResponse.json(
         { error: "Cannot submit in preview mode" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!workerId || !caption) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const trimmedCaption = caption.trim();
 
-    if (!isValidNonWhitespaceLength(trimmedCaption, MIN_LENGTH, MAX_LENGTH)) {
+    if (!isValidWordCount(trimmedCaption, MIN_WORDS, MAX_WORDS)) {
       return NextResponse.json(
         {
-          error: `Caption must be between ${MIN_LENGTH} and ${MAX_LENGTH} characters (excluding spaces)`,
+          error: `Review must be between ${MIN_WORDS} and ${MAX_WORDS} words`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,7 +96,7 @@ export async function POST(request: NextRequest) {
         dayIdx: currentDayIdx,
       },
       select: {
-        captionA: true,
+        answer: true,
         workerId: true,
       },
     });
@@ -56,41 +104,45 @@ export async function POST(request: NextRequest) {
     // 新しいキャプションと既存のキャプションの類似度をチェック
     let isSimilar = false;
     for (const existingSubmission of todaySubmissions) {
-      if (!existingSubmission.captionA) continue;
+      if (!existingSubmission.answer) continue;
 
       const similarity = calculateWERSimilarity(
         trimmedCaption,
-        existingSubmission.captionA
+        existingSubmission.answer,
       );
 
       if (similarity >= SIMILARITY_THRESHOLD) {
         console.warn(
           `High similarity detected: ${similarity.toFixed(
-            3
-          )} between ${workerId} and ${existingSubmission.workerId}`
+            3,
+          )} between ${workerId} and ${existingSubmission.workerId}`,
         );
         isSimilar = true;
         break;
       }
     }
 
-    // 類似度が高い場合はworkerIdに"xx_"プレフィックスを付ける
-    const finalWorkerId = isSimilar ? `xx_${workerId}` : workerId;
-
-    // participantテーブルに最終的なworkerIdを登録（グループ分けを含む）
+    // participantテーブルに登録（類似度に応じてcondを設定）
     let participant = await prisma.participant.findUnique({
-      where: { workerId: finalWorkerId },
+      where: { workerId: workerId },
     });
 
     if (!participant) {
       // 新しい参加者の場合、順序とグループを決定
       const participantCount = await prisma.participant.count();
       const newOrder = participantCount + 1;
-      const groupCond = ((newOrder - 1) % 4) + 1; // 1, 2, 3, 4 のグループ
+      
+      // 類似度が高い場合はcond=0、それ以外は1or2
+      let groupCond: number;
+      if (isSimilar) {
+        groupCond = 0; // 類似度が高い場合
+      } else {
+        groupCond = (newOrder % 2) + 1; // 1 or 2 を交互に割り当て
+      }
 
       participant = await prisma.participant.create({
         data: {
-          workerId: finalWorkerId,
+          workerId: workerId,
           participantOrder: newOrder,
           cond: groupCond,
         },
@@ -100,7 +152,7 @@ export async function POST(request: NextRequest) {
     const existingSubmission = await prisma.submission.findUnique({
       where: {
         workerId_dayIdx: {
-          workerId: finalWorkerId,
+          workerId: workerId,
           dayIdx: currentDayIdx,
         },
       },
@@ -109,35 +161,22 @@ export async function POST(request: NextRequest) {
     if (existingSubmission) {
       return NextResponse.json(
         { error: "You have already submitted for today" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // コンプリーションコードを生成（類似度が高くない場合のみ）
-    const completionCode = isSimilar ? null : generateCompletionCode();
+    // コンプリーションコードを生成（類似度に関わらず生成）
+    const completionCode = generateCompletionCode();
 
     const submission = await prisma.submission.create({
       data: {
-        workerId: finalWorkerId,
+        workerId: workerId,
         dayIdx: currentDayIdx,
-        captionA: trimmedCaption,
+        answer: trimmedCaption,
         rtMs: rtMs || null,
         completionCode: completionCode,
       },
     });
-
-    // 類似度が高い場合はコンプリーションコードを返さない
-    if (isSimilar) {
-      return NextResponse.json({
-        ok: true,
-        submissionId: submission.id,
-        warning: "Similar submission detected",
-        groupInfo: {
-          cond: participant.cond,
-          participantOrder: participant.participantOrder,
-        },
-      });
-    }
 
     return NextResponse.json({
       ok: true,
@@ -147,12 +186,13 @@ export async function POST(request: NextRequest) {
         cond: participant.cond,
         participantOrder: participant.participantOrder,
       },
+      isSimilar: isSimilar, // 類似度が高いかどうかの情報を追加
     });
   } catch (error) {
     console.error("Submission error:", error);
     return NextResponse.json(
       { error: "Failed to process submission" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
