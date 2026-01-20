@@ -18,6 +18,8 @@ export interface PreviousSubmissionData {
   scoreB: number | null;
   scoreSum: number | null;
   dayIdx: number;
+  taskNumber: number | null;
+  nextTaskNumber: number | null;
 }
 
 export function isFirstDay(): boolean {
@@ -27,7 +29,7 @@ export function isFirstDay(): boolean {
 }
 
 export async function getYesterdayHistogram(
-  workerId: string
+  workerId: string,
 ): Promise<HistogramData | null> {
   console.log("Getting histogram for workerId:", workerId);
 
@@ -99,7 +101,7 @@ export async function getYesterdayHistogram(
 }
 
 export async function getYesterdayGoalProgress(
-  workerId: string
+  workerId: string,
 ): Promise<GoalData | null> {
   // 初日の場合はnullを返す
   if (isFirstDay()) {
@@ -137,7 +139,7 @@ export async function getYesterdayGoalProgress(
     "target:",
     target,
     "threshold:",
-    threshold
+    threshold,
   );
 
   // submissionsテーブルから前日まで（当日は含まない）で、同じcondのparticipantsのscore_aをカウント
@@ -161,14 +163,48 @@ export async function getYesterdayGoalProgress(
 }
 
 export async function getPreviousSubmission(
-  workerId: string
-): Promise<PreviousSubmissionData | null> {
+  workerId: string,
+): Promise<PreviousSubmissionData | { nextTaskNumber: number | null }> {
   const todayIdx = getCurrentDayIdx();
   const yesterdayIdx = todayIdx - 1;
 
+  // Get next task number (always calculated, even if no previous submission)
+  let nextTaskNumber: number | null = null;
+  try {
+    const AVAILABLE_TASKS = [1, 2, 3, 4, 5, 6, 7];
+
+    // Get completed task numbers
+    const completedSubmissions = await prisma.submission.findMany({
+      where: {
+        workerId,
+        taskNumber: { not: null },
+      },
+      select: {
+        taskNumber: true,
+      },
+    });
+
+    const completedTasks = completedSubmissions
+      .map((s) => s.taskNumber)
+      .filter((t) => t !== null) as number[];
+
+    // Find available tasks
+    const availableTasks = AVAILABLE_TASKS.filter(
+      (task) => !completedTasks.includes(task),
+    );
+
+    // Select randomly from available tasks
+    if (availableTasks.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableTasks.length);
+      nextTaskNumber = availableTasks[randomIndex];
+    }
+  } catch (err) {
+    console.log("Could not get next task number:", err);
+  }
+
   if (yesterdayIdx < 0) {
     console.log("No previous day available for worker", workerId);
-    return null;
+    return { nextTaskNumber };
   }
 
   const submission = await prisma.submission.findUnique({
@@ -183,12 +219,18 @@ export async function getPreviousSubmission(
       scoreA: true,
       scoreB: true,
       dayIdx: true,
+      taskNumber: true,
     },
   });
 
   if (!submission) {
-    console.log("No previous submission found for", workerId, "at", yesterdayIdx);
-    return null;
+    console.log(
+      "No previous submission found for",
+      workerId,
+      "at",
+      yesterdayIdx,
+    );
+    return { nextTaskNumber };
   }
 
   const hasAnyScore = submission.scoreA !== null || submission.scoreB !== null;
@@ -202,5 +244,7 @@ export async function getPreviousSubmission(
     scoreB: submission.scoreB,
     scoreSum,
     dayIdx: submission.dayIdx,
+    taskNumber: submission.taskNumber ?? null,
+    nextTaskNumber,
   };
 }

@@ -14,12 +14,16 @@ import { Button } from "@/components/ui/button";
 export function TaskPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const nextTaskNumberParam = searchParams.get("nextTaskNumber");
+  const nextTaskNumber = nextTaskNumberParam
+    ? parseInt(nextTaskNumberParam)
+    : null;
   const [completionCode, setCompletionCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
-  const [taskNumber, setTaskNumber] = useState<number | null>(null);
+  const [taskNumber, setTaskNumber] = useState<number | null>(nextTaskNumber);
 
   const workerId = searchParams.get("workerId") || "";
   const assignmentId = searchParams.get("assignmentId") || "";
@@ -29,23 +33,24 @@ export function TaskPageContent() {
   const imageUrl = process.env.NEXT_PUBLIC_TODAY_IMAGE_URL_A || "";
 
   // taskNumberをfeedback APIから取得（workerId決定後、一度だけ実行）
-  useEffect(() => {
-    if (!workerId) return;
-    const fetchTaskNumber = async () => {
-      try {
-        const response = await fetch(
-          `/api/feedback?workerId=${encodeURIComponent(workerId)}`,
-        );
-        const data = await response.json();
-        if (response.ok && data.nextTaskNumber) {
-          setTaskNumber(data.nextTaskNumber);
-        }
-      } catch (err) {
-        console.error("Failed to fetch task number:", err);
-      }
-    };
-    fetchTaskNumber();
-  }, [workerId]);
+  // useEffect(() => {
+  //   if (!workerId) return;
+  //   if (taskNumber !== null) return; // 既にクエリで受け取っている場合は取得しない
+  //   const fetchTaskNumber = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `/api/feedback?workerId=${encodeURIComponent(workerId)}`,
+  //       );
+  //       const data = await response.json();
+  //       if (response.ok && data.nextTaskNumber) {
+  //         setTaskNumber(data.nextTaskNumber);
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch task number:", err);
+  //     }
+  //   };
+  //   fetchTaskNumber();
+  // }, [workerId, taskNumber]);
 
   console.log(taskNumber);
 
@@ -55,7 +60,11 @@ export function TaskPageContent() {
     router.push(url);
   };
 
-  const handleSubmit = async (caption: string, rtMs: number, selectedTaskNumber: number) => {
+  const handleSubmit = async (
+    caption: string,
+    rtMs: number,
+    selectedTaskNumber: number,
+  ) => {
     setError(null);
     setWarning(null);
     try {

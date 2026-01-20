@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ type PreviousSubmission = {
   scoreB: number | null;
   scoreSum: number | null;
   dayIdx: number;
+  taskNumber: number | null;
 };
 
 interface FeedbackPageProps {
@@ -34,6 +35,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [taskNumber, setTaskNumber] = useState<number | null>(null);
+  const [nextTaskNumber, setNextTaskNumber] = useState<number | null>(null);
 
   const workerId = searchParams.get("workerId") || "";
 
@@ -59,8 +61,11 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
           return;
         }
 
+        console.log("Fetched feedback data:", data);
+
         setPreviousSubmission(data.previousSubmission ?? null);
-        setTaskNumber(data.nextTaskNumber ?? 1);
+        setTaskNumber(data.taskNumber ?? null);
+        setNextTaskNumber(data.nextTaskNumber ?? null);
       } catch (err) {
         setError("Network error while loading feedback.");
       } finally {
@@ -71,24 +76,18 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     fetchFeedback();
   }, [workerId]);
 
-  const scoreLabel = useMemo(() => {
-    if (!previousSubmission) return "--";
-    if (previousSubmission.scoreSum !== null)
-      return previousSubmission.scoreSum;
-    if (
-      previousSubmission.scoreA !== null ||
-      previousSubmission.scoreB !== null
-    ) {
-      return (
-        (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0)
-      );
-    }
-    return "--";
-  }, [previousSubmission]);
+  const scoreLabel = previousSubmission
+    ? previousSubmission.scoreSum !== null
+      ? previousSubmission.scoreSum
+      : (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0) > 0
+        ? (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0)
+        : "--"
+    : "--";
 
   // Select the appropriate page component based on taskNumber
   const getDayComponent = () => {
-    const dayNum = taskNumber || dayNumber;
+    console.log("Rendering day component for taskNumber:", taskNumber);
+    const dayNum = taskNumber;
     switch (dayNum) {
       case 0:
         return <Day0Page />;
@@ -105,8 +104,9 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
       case 7:
         return <Day7Page />;
       case 1:
-      default:
         return <Day1Page />;
+      default:
+        return <></>;
     }
   };
 
@@ -117,7 +117,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     // 現在のクエリパラメータを保持して遷移
     const params = searchParams.toString();
     const separator = params ? "&" : "?";
-    const url = `/task/answer${params ? "?" + params : ""}${separator}feedbackTimeMs=${feedbackTimeMs}`;
+    const url = `/task/answer${params ? "?" + params : ""}${separator}feedbackTimeMs=${feedbackTimeMs}&nextTaskNumber=${nextTaskNumber}`;
     router.push(url);
   };
 
@@ -152,11 +152,6 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
                 <div className="text-4xl font-bold text-blue-600">
                   {isLoading ? "Loading..." : scoreLabel}
                 </div>
-                {/* {previousSubmission && (
-                  <p className="text-sm text-slate-600 mt-1">
-                    Day index: {previousSubmission.dayIdx}
-                  </p>
-                )} */}
                 {!previousSubmission && !isLoading && (
                   <p className="text-sm text-slate-600 mt-1">
                     No score available yet. Please check back after your first
@@ -194,6 +189,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
             onClick={handleGoToAnswer}
             size="lg"
             className="w-full max-w-md"
+            disabled={isLoading}
           >
             Proceed to Today&apos;s Answer Page
           </Button>
