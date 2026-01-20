@@ -162,7 +162,7 @@ export function CaptionForm({
                   isValidLength(caption) ? "text-green-600" : "text-slate-500"
                 }`}
               >
-                {countWords(caption)} / {MIN_WORDS} words
+                {countWords(caption)} words (minimum {MIN_WORDS})
               </span>
             </div>
             <Textarea
