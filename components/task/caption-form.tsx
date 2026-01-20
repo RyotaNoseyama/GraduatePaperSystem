@@ -18,7 +18,11 @@ import Day7Page from "@/app/embedded-app/day7";
 import { Loading } from "./loading";
 
 interface CaptionFormProps {
-  onSubmit: (caption: string, rtMs: number, taskNumber: number) => Promise<void>;
+  onSubmit: (
+    caption: string,
+    rtMs: number,
+    taskNumber: number,
+  ) => Promise<void>;
   disabled?: boolean;
   imageUrl?: string;
   pageStartTime?: number;
@@ -48,7 +52,7 @@ export function CaptionForm({
   const [interactions, setInteractions] = useState<any[]>([]);
   // taskNumber が null の場合のみ、デフォルト値を生成し、それ以降は変更しない
   const [defaultTask] = useState(() =>
-    taskNumber !== null ? null : getDefaultTaskNumber()
+    taskNumber !== null ? null : getDefaultTaskNumber(),
   );
 
   // 埋め込みアプリからのpostMessageを受信
@@ -71,7 +75,7 @@ export function CaptionForm({
 
   // taskNumberに応じたコンポーネントを取得
   const getDayComponent = useCallback(() => {
-    const dayNum = taskNumber || defaultTask;
+    const dayNum = taskNumber;
     switch (dayNum) {
       case 0:
         return <Day0Page />;
