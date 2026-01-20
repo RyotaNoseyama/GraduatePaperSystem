@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { Submission, Participant } from "@prisma/client";
 import OpenAI from "openai";
 import { verifyAdminToken } from "@/lib/admin-auth";
 
@@ -47,8 +48,10 @@ export async function POST(request: NextRequest) {
       prompt ||
       `以下の回答を評価してください。\n回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。`;
 
+    type SubmissionWithParticipant = Submission & { participant: Participant };
+
     const results = await Promise.all(
-      submissions.map(async (submission) => {
+      submissions.map(async (submission: SubmissionWithParticipant) => {
         try {
           const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
