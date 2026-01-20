@@ -126,9 +126,9 @@ export function TaskPageContent() {
   }
 
   // taskNumber取得中はローディング表示
-  if (taskNumber === null) {
-    return <Loading />;
-  }
+  // if (taskNumber === null) {
+  //   return <Loading />;
+  // }
 
   if (hasSubmitted && completionCode) {
     const groupMessage = groupInfo ? getGroupMessage(groupInfo!) : null;
