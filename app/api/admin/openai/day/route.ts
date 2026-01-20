@@ -5,9 +5,13 @@ import { verifyAdminToken } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAI = () => {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not set");
+  }
+  return new OpenAI({ apiKey });
+};
 
 /**
  * 指定された dayIdx の submission を一括で OpenAI に送信
@@ -58,6 +62,8 @@ export async function POST(request: NextRequest) {
     const systemPrompt =
       prompt ||
       `以下の回答を評価してください。\n回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。`;
+
+    const openai = getOpenAI();
 
     const results = await Promise.all(
       submissions.map(async (submission) => {

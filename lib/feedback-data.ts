@@ -12,9 +12,18 @@ export interface GoalData {
   threshold: number;
 }
 
+export interface PreviousSubmissionData {
+  feedback: string | null;
+  scoreA: number | null;
+  scoreB: number | null;
+  scoreSum: number | null;
+  dayIdx: number;
+}
+
 export function isFirstDay(): boolean {
-  // 固定で day_idx=20387 のフィードバックを表示するため、初日判定を無効化
-  return false;
+  const todayIdx = getCurrentDayIdx();
+  const yesterdayIdx = todayIdx - 1;
+  return yesterdayIdx < 0;
 }
 
 export async function getYesterdayHistogram(
@@ -28,9 +37,8 @@ export async function getYesterdayHistogram(
     return null;
   }
 
-  // 固定でday_idx=20387のデータを取得
-  const yesterdayIdx = 20387;
-  console.log("Fixed yesterday idx:", yesterdayIdx);
+  const yesterdayIdx = getCurrentDayIdx() - 1;
+  console.log("Computed yesterday idx:", yesterdayIdx);
 
   // まず、このworkerのcondを取得
   const workerResult = await prisma.$queryRaw<{ cond: number | null }[]>`
@@ -117,15 +125,14 @@ export async function getYesterdayGoalProgress(
   }
 
   const workerCond = workerResult[0].cond;
-  // 固定でday_idx=20388として、20387以下のデータをカウント
-  const todayIdx = 20388;
+  const todayIdx = getCurrentDayIdx();
   const target = parseInt(process.env.GOAL_TARGET || "80", 10);
   const threshold = parseInt(process.env.GOAL_THRESHOLD || "7", 10);
 
   console.log(
     "Worker cond:",
     workerCond,
-    "fixed todayIdx:",
+    "computed todayIdx:",
     todayIdx,
     "target:",
     target,
@@ -151,4 +158,49 @@ export async function getYesterdayGoalProgress(
   console.log("Final goal data:", { current, target, threshold });
 
   return { current, target, threshold };
+}
+
+export async function getPreviousSubmission(
+  workerId: string
+): Promise<PreviousSubmissionData | null> {
+  const todayIdx = getCurrentDayIdx();
+  const yesterdayIdx = todayIdx - 1;
+
+  if (yesterdayIdx < 0) {
+    console.log("No previous day available for worker", workerId);
+    return null;
+  }
+
+  const submission = await prisma.submission.findUnique({
+    where: {
+      workerId_dayIdx: {
+        workerId,
+        dayIdx: yesterdayIdx,
+      },
+    },
+    select: {
+      feedback: true,
+      scoreA: true,
+      scoreB: true,
+      dayIdx: true,
+    },
+  });
+
+  if (!submission) {
+    console.log("No previous submission found for", workerId, "at", yesterdayIdx);
+    return null;
+  }
+
+  const hasAnyScore = submission.scoreA !== null || submission.scoreB !== null;
+  const scoreSum = hasAnyScore
+    ? (submission.scoreA ?? 0) + (submission.scoreB ?? 0)
+    : null;
+
+  return {
+    feedback: submission.feedback,
+    scoreA: submission.scoreA,
+    scoreB: submission.scoreB,
+    scoreSum,
+    dayIdx: submission.dayIdx,
+  };
 }

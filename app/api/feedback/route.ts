@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getYesterdayHistogram,
   getYesterdayGoalProgress,
+  getPreviousSubmission,
 } from "@/lib/feedback-data";
 import { prisma } from "@/lib/prisma";
 
@@ -19,9 +20,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const [histogram, goal, participant] = await Promise.all([
+    const [histogram, goal, previousSubmission, participant] = await Promise.all([
       getYesterdayHistogram(workerId),
       getYesterdayGoalProgress(workerId),
+      getPreviousSubmission(workerId),
       prisma.participant.findUnique({
         where: { workerId },
         select: { cond: true, participantOrder: true },
@@ -35,11 +37,17 @@ export async function GET(request: NextRequest) {
         }
       : null;
 
-    console.log("API feedback data:", { histogram, goal, groupInfo });
+    console.log("API feedback data:", {
+      histogram,
+      goal,
+      previousSubmission,
+      groupInfo,
+    });
 
     return NextResponse.json({
       histogram,
       goal,
+      previousSubmission,
       groupInfo,
     });
   } catch (error) {
