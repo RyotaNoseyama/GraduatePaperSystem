@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { Submission, Participant } from "@prisma/client";
 import OpenAI from "openai";
 import { verifyAdminToken } from "@/lib/admin-auth";
 
@@ -30,10 +29,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 指定日の submissions を取得
-    const submissions = await prisma.submission.findMany({
+    type SubmissionForAI = {
+      id: string;
+      workerId: string;
+      dayIdx: number;
+      answer: string;
+    };
+
+    // 指定日の submissions を取得（必要フィールドだけ select）
+    const submissions: SubmissionForAI[] = await prisma.submission.findMany({
       where: { dayIdx },
-      include: { participant: true },
+      select: {
+        id: true,
+        workerId: true,
+        dayIdx: true,
+        answer: true,
+      },
       orderBy: { submittedAt: "desc" },
     });
 
@@ -48,10 +59,8 @@ export async function POST(request: NextRequest) {
       prompt ||
       `以下の回答を評価してください。\n回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。`;
 
-    type SubmissionWithParticipant = Submission & { participant: Participant };
-
     const results = await Promise.all(
-      submissions.map(async (submission: SubmissionWithParticipant) => {
+      submissions.map(async (submission) => {
         try {
           const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
