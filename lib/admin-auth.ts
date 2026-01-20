@@ -1,24 +1,31 @@
-import crypto from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { NextRequest } from "next/server";
 
 // シンプルなハッシュ化とハッシュ検証
 
 export async function hashPassword(password: string): Promise<string> {
-  // crypto.pbkdf2を使用してハッシュ化
-  return new Promise((resolve, reject) => {
-    crypto.pbkdf2(
-      password,
-      process.env.ADMIN_PASSWORD_SALT || "default-salt",
-      100000,
-      64,
-      "sha512",
-      (err, hash) => {
-        if (err) reject(err);
-        else resolve(hash.toString("hex"));
-      },
-    );
-  });
+  // Use Web Crypto PBKDF2 to stay compatible with Edge runtime
+  const enc = new TextEncoder();
+  const salt = enc.encode(process.env.ADMIN_PASSWORD_SALT || "default-salt");
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"],
+  );
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt,
+      iterations: 100000,
+      hash: "SHA-512",
+    },
+    keyMaterial,
+    64 * 8,
+  );
+
+  return bufferToHex(new Uint8Array(derivedBits));
 }
 
 export async function verifyPassword(
@@ -33,6 +40,11 @@ const getSecretKey = () =>
   new TextEncoder().encode(
     process.env.JWT_SECRET || process.env.ADMIN_JWT_SECRET || "your-secret-key",
   );
+
+const bufferToHex = (buffer: Uint8Array): string =>
+  Array.from(buffer)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 
 export async function generateJWT(adminId: string): Promise<string> {
   return await new SignJWT({ adminId })

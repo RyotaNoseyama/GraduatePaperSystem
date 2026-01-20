@@ -168,7 +168,8 @@ export function TaskPageContent() {
 
         <div className="space-y-6">
           <Instructions groupInfo={groupInfo} />
-          <div className="mb-6">
+          {/* このボタンは、day1以降で表示 */}
+          {/* <div className="mb-6">
             <Button
               onClick={handleBackToFeedback}
               className="mb-4 bg-blue-600 hover:bg-blue-700 text-white"
@@ -176,7 +177,7 @@ export function TaskPageContent() {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Feedback
             </Button>
-          </div>
+          </div> */}
           <CaptionForm
             onSubmit={handleSubmit}
             disabled={isPreview}
