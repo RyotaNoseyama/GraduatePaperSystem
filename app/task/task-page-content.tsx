@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Instructions } from "@/components/task/instructions";
 import { CaptionForm } from "@/components/task/caption-form";
+import { Loading } from "@/components/task/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
@@ -18,6 +19,7 @@ export function TaskPageContent() {
   const [warning, setWarning] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
+  const [taskNumber, setTaskNumber] = useState<number | null>(null);
 
   const workerId = searchParams.get("workerId") || "";
   const assignmentId = searchParams.get("assignmentId") || "";
@@ -26,13 +28,34 @@ export function TaskPageContent() {
   const isPreview = assignmentId === "ASSIGNMENT_ID_NOT_AVAILABLE";
   const imageUrl = process.env.NEXT_PUBLIC_TODAY_IMAGE_URL_A || "";
 
+  // taskNumberをfeedback APIから取得（workerId決定後、一度だけ実行）
+  useEffect(() => {
+    if (!workerId) return;
+    const fetchTaskNumber = async () => {
+      try {
+        const response = await fetch(
+          `/api/feedback?workerId=${encodeURIComponent(workerId)}`,
+        );
+        const data = await response.json();
+        if (response.ok && data.nextTaskNumber) {
+          setTaskNumber(data.nextTaskNumber);
+        }
+      } catch (err) {
+        console.error("Failed to fetch task number:", err);
+      }
+    };
+    fetchTaskNumber();
+  }, [workerId]);
+
+  console.log(taskNumber);
+
   const handleBackToFeedback = () => {
     const params = searchParams.toString();
     const url = params ? `/task?${params}` : "/task";
     router.push(url);
   };
 
-  const handleSubmit = async (caption: string, rtMs: number) => {
+  const handleSubmit = async (caption: string, rtMs: number, selectedTaskNumber: number) => {
     setError(null);
     setWarning(null);
     try {
@@ -48,6 +71,7 @@ export function TaskPageContent() {
           assignmentId,
           hitId,
           caption,
+          taskNumber: selectedTaskNumber,
           rtMs: fbTime, // FBページ（/task）の滞在時間のみを送信
         }),
       });
@@ -92,8 +116,13 @@ export function TaskPageContent() {
     );
   }
 
+  // taskNumber取得中はローディング表示
+  if (taskNumber === null) {
+    return <Loading />;
+  }
+
   if (hasSubmitted && completionCode) {
-    const groupMessage = groupInfo ? getGroupMessage(groupInfo) : null;
+    const groupMessage = groupInfo ? getGroupMessage(groupInfo!) : null;
 
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -182,6 +211,7 @@ export function TaskPageContent() {
             onSubmit={handleSubmit}
             disabled={isPreview}
             imageUrl={imageUrl}
+            taskNumber={taskNumber}
           />
         </div>
       </div>

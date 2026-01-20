@@ -1,35 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ImageDisplay } from "./image-display";
 import { countWords, isValidWordCount } from "@/lib/text-utils";
-import Day1Page from "@/app/embedded-app/page";
+import Day0Page from "@/app/embedded-app/day0";
+import Day1Page from "@/app/embedded-app/day1";
+import Day2Page from "@/app/embedded-app/day2";
+import Day3Page from "@/app/embedded-app/day3";
+import Day4Page from "@/app/embedded-app/day4";
+import Day5Page from "@/app/embedded-app/day5";
+import Day6Page from "@/app/embedded-app/day6";
+import Day7Page from "@/app/embedded-app/day7";
+import { Loading } from "./loading";
 
 interface CaptionFormProps {
-  onSubmit: (caption: string, rtMs: number) => Promise<void>;
+  onSubmit: (caption: string, rtMs: number, taskNumber: number) => Promise<void>;
   disabled?: boolean;
   imageUrl?: string;
   pageStartTime?: number;
+  taskNumber?: number | null;
 }
 
 const MIN_WORDS = 20;
 const MAX_WORDS = 500;
+
+// デフォルト値として Day2-7 からランダムに選ぶ
+function getDefaultTaskNumber(): number {
+  const defaultTasks = [2, 3, 4, 5, 6, 7];
+  return defaultTasks[Math.floor(Math.random() * defaultTasks.length)];
+}
 
 export function CaptionForm({
   onSubmit,
   disabled,
   imageUrl,
   pageStartTime,
+  taskNumber,
 }: CaptionFormProps) {
   const [caption, setCaption] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startTime] = useState(Date.now());
   const [showCaptionError, setShowCaptionError] = useState(false);
   const [interactions, setInteractions] = useState<any[]>([]);
+  // taskNumber が null の場合のみ、デフォルト値を生成し、それ以降は変更しない
+  const [defaultTask] = useState(() =>
+    taskNumber !== null ? null : getDefaultTaskNumber()
+  );
 
   // 埋め込みアプリからのpostMessageを受信
   useEffect(() => {
@@ -48,6 +68,31 @@ export function CaptionForm({
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+
+  // taskNumberに応じたコンポーネントを取得
+  const getDayComponent = useCallback(() => {
+    const dayNum = taskNumber || defaultTask;
+    switch (dayNum) {
+      case 0:
+        return <Day0Page />;
+      case 1:
+        return <Day1Page />;
+      case 2:
+        return <Day2Page />;
+      case 3:
+        return <Day3Page />;
+      case 4:
+        return <Day4Page />;
+      case 5:
+        return <Day5Page />;
+      case 6:
+        return <Day6Page />;
+      case 7:
+        return <Day7Page />;
+      default:
+        return <Loading />;
+    }
+  }, [taskNumber, defaultTask]);
 
   const isValidLength = (text: string) =>
     isValidWordCount(text, MIN_WORDS, MAX_WORDS);
@@ -75,7 +120,8 @@ export function CaptionForm({
       console.log("Total interactions recorded:", interactions.length);
       console.log("Interaction data:", interactions);
 
-      await onSubmit(caption, rtMs);
+      const usedTaskNumber = (taskNumber ?? defaultTask)!;
+      await onSubmit(caption, rtMs, usedTaskNumber);
     } catch (error) {
       console.error("Submission error:", error);
       setIsSubmitting(false);
@@ -95,7 +141,7 @@ export function CaptionForm({
           <div className="space-y-2 border border-black">
             {/* <Label className="text-sm font-medium text-slate-700">Image</Label> */}
             {/* <ImageDisplay imageUrl={imageUrl} /> */}
-            <Day1Page></Day1Page>
+            {getDayComponent()}
           </div>
 
           <div className="space-y-2">
@@ -126,7 +172,6 @@ export function CaptionForm({
                   : "border-slate-300 focus:border-slate-400"
               }`}
               disabled={disabled || isSubmitting}
-              maxLength={MAX_WORDS}
             />
             {showCaptionError && (
               <p className="text-red-500 text-xs mt-1">

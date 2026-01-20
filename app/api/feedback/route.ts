@@ -5,6 +5,8 @@ import {
   getPreviousSubmission,
 } from "@/lib/feedback-data";
 import { prisma } from "@/lib/prisma";
+import { getNextTaskNumber } from "@/lib/task-assignment";
+import { getCurrentDayIdx } from "@/lib/date-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -16,19 +18,21 @@ export async function GET(request: NextRequest) {
     if (!workerId) {
       return NextResponse.json(
         { error: "workerId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const [histogram, goal, previousSubmission, participant] = await Promise.all([
-      getYesterdayHistogram(workerId),
-      getYesterdayGoalProgress(workerId),
-      getPreviousSubmission(workerId),
-      prisma.participant.findUnique({
-        where: { workerId },
-        select: { cond: true, participantOrder: true },
-      }),
-    ]);
+    const [histogram, goal, previousSubmission, participant, nextTaskNumber] =
+      await Promise.all([
+        getYesterdayHistogram(workerId),
+        getYesterdayGoalProgress(workerId),
+        getPreviousSubmission(workerId),
+        prisma.participant.findUnique({
+          where: { workerId },
+          select: { cond: true, participantOrder: true },
+        }),
+        getNextTaskNumber(workerId),
+      ]);
 
     const groupInfo = participant
       ? {
@@ -42,6 +46,7 @@ export async function GET(request: NextRequest) {
       goal,
       previousSubmission,
       groupInfo,
+      nextTaskNumber,
     });
 
     return NextResponse.json({
@@ -49,12 +54,13 @@ export async function GET(request: NextRequest) {
       goal,
       previousSubmission,
       groupInfo,
+      nextTaskNumber,
     });
   } catch (error) {
     console.error("Feedback error:", error);
     return NextResponse.json(
       { error: "Failed to load feedback data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

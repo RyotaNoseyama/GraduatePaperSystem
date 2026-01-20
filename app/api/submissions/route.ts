@@ -4,6 +4,7 @@ import { getCurrentDayIdx, generateCompletionCode } from "@/lib/date-utils";
 import { calculateWERSimilarity } from "@/lib/wer-similarity";
 import { isValidWordCount } from "@/lib/text-utils";
 import { verifyAdminToken } from "@/lib/admin-auth";
+import { getNextTaskNumber, getAvailableTaskNumbers } from "@/lib/task-assignment";
 
 const MIN_WORDS = 20;
 const MAX_WORDS = 500;
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { workerId, assignmentId, hitId, caption, rtMs } = body;
+    const { workerId, assignmentId, hitId, caption, rtMs, taskNumber } = body;
 
     if (assignmentId === "ASSIGNMENT_ID_NOT_AVAILABLE") {
       return NextResponse.json(
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
       // 新しい参加者の場合、順序とグループを決定
       const participantCount = await prisma.participant.count();
       const newOrder = participantCount + 1;
-      
+
       // 類似度が高い場合はcond=0、それ以外は1or2
       let groupCond: number;
       if (isSimilar) {
@@ -168,10 +169,26 @@ export async function POST(request: NextRequest) {
     // コンプリーションコードを生成（類似度に関わらず生成）
     const completionCode = generateCompletionCode();
 
+    // タスク番号を決定: クライアント指定があればそれを検証して使用、無ければサーバーで割り当て
+    let resolvedTaskNumber: number;
+    if (typeof taskNumber === "number") {
+      const available = await getAvailableTaskNumbers(workerId);
+      if (!available.includes(taskNumber)) {
+        return NextResponse.json(
+          { error: "Invalid or already used task number" },
+          { status: 400 },
+        );
+      }
+      resolvedTaskNumber = taskNumber;
+    } else {
+      resolvedTaskNumber = await getNextTaskNumber(workerId);
+    }
+
     const submission = await prisma.submission.create({
       data: {
         workerId: workerId,
         dayIdx: currentDayIdx,
+        taskNumber: resolvedTaskNumber,
         answer: trimmedCaption,
         rtMs: rtMs || null,
         completionCode: completionCode,

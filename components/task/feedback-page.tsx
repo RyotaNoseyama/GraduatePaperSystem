@@ -33,6 +33,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     useState<PreviousSubmission | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [taskNumber, setTaskNumber] = useState<number | null>(null);
 
   const workerId = searchParams.get("workerId") || "";
 
@@ -59,6 +60,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
         }
 
         setPreviousSubmission(data.previousSubmission ?? null);
+        setTaskNumber(data.nextTaskNumber ?? 1);
       } catch (err) {
         setError("Network error while loading feedback.");
       } finally {
@@ -84,9 +86,10 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     return "--";
   }, [previousSubmission]);
 
-  // Select the appropriate page component based on dayNumber
+  // Select the appropriate page component based on taskNumber
   const getDayComponent = () => {
-    switch (dayNumber) {
+    const dayNum = taskNumber || dayNumber;
+    switch (dayNum) {
       case 0:
         return <Day0Page />;
       case 2:
