@@ -171,7 +171,7 @@ export async function getPreviousSubmission(
   // Get next task number (always calculated, even if no previous submission)
   let nextTaskNumber: number | null = null;
   try {
-    const AVAILABLE_TASKS = [1, 2, 3, 4, 5, 6, 7];
+    const AVAILABLE_TASKS = [0, 1, 2, 3, 4, 5, 6, 7];
 
     // Get completed task numbers
     const completedSubmissions = await prisma.submission.findMany({
