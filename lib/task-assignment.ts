@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
-// タスク番号は 1-7
-const AVAILABLE_TASKS = [1, 2, 3, 4, 5, 6, 7];
+// タスク番号は 0-7
+const AVAILABLE_TASKS = [0, 1, 2, 3, 4, 5, 6, 7];
 
 /**
  * 指定された参加者が既に完了したタスク番号の一覧を取得
