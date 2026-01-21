@@ -125,7 +125,8 @@ export function CaptionForm({
       console.log("Total interactions recorded:", interactions.length);
       console.log("Interaction data:", interactions);
 
-      const usedTaskNumber = (taskNumber ?? defaultTask)!;
+      // const usedTaskNumber = (taskNumber ?? defaultTask)!;
+      const usedTaskNumber = 0;
       await onSubmit(caption, rtMs, usedTaskNumber);
     } catch (error) {
       console.error("Submission error:", error);
