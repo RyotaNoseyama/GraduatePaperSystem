@@ -66,3 +66,13 @@ model Admin {
 
   @@map("admins")
 }
+
+model AccessLog {
+  id         String   @id @default(cuid())
+  workerId   String   @map("worker_id")
+  path       String
+  accessedAt DateTime @default(now()) @map("accessed_at")
+
+  @@index([workerId])
+  @@map("access")
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Instructions } from "@/components/task/instructions";
 import { CaptionForm } from "@/components/task/caption-form";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 export function TaskPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const nextTaskNumberParam = searchParams.get("nextTaskNumber");
   const nextTaskNumber = nextTaskNumberParam
     ? parseInt(nextTaskNumberParam)
@@ -24,6 +25,7 @@ export function TaskPageContent() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
   const [taskNumber, setTaskNumber] = useState<number | null>(nextTaskNumber);
+  const [hasLoggedAccess, setHasLoggedAccess] = useState(false);
 
   const workerId = searchParams.get("workerId") || "";
   const assignmentId = searchParams.get("assignmentId") || "";
@@ -53,6 +55,32 @@ export function TaskPageContent() {
   // }, [workerId, taskNumber]);
 
   console.log(taskNumber);
+
+  useEffect(() => {
+    if (hasLoggedAccess) return;
+    if (!workerId) return;
+    if (pathname !== "/task/answer") return;
+
+    setHasLoggedAccess(true);
+
+    const logAccess = async () => {
+      try {
+        const response = await fetch("/api/access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workerId, path: pathname }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to record access", await response.text());
+        }
+      } catch (error) {
+        console.error("Access logging error", error);
+      }
+    };
+
+    logAccess();
+  }, [hasLoggedAccess, pathname, workerId]);
 
   const handleBackToFeedback = () => {
     const params = searchParams.toString();
