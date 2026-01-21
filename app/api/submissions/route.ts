@@ -4,9 +4,12 @@ import { getCurrentDayIdx, generateCompletionCode } from "@/lib/date-utils";
 import { calculateWERSimilarity } from "@/lib/wer-similarity";
 import { isValidWordCount } from "@/lib/text-utils";
 import { verifyAdminToken } from "@/lib/admin-auth";
-import { getNextTaskNumber, getAvailableTaskNumbers } from "@/lib/task-assignment";
+import {
+  getNextTaskNumber,
+  getAvailableTaskNumbers,
+} from "@/lib/task-assignment";
 
-const MIN_WORDS = 20;
+const MIN_WORDS = 10;
 const MAX_WORDS = 500;
 const SIMILARITY_THRESHOLD = 0.8; // 8割の類似度閾値
 

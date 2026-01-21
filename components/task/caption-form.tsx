@@ -29,7 +29,7 @@ interface CaptionFormProps {
   taskNumber?: number | null;
 }
 
-const MIN_WORDS = 20;
+const MIN_WORDS = 10;
 const MAX_WORDS = 500;
 
 // デフォルト値として Day2-7 からランダムに選ぶ
