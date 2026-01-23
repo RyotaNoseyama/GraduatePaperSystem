@@ -14,7 +14,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6 text-slate-700 leading-relaxed">
-        <section className="space-y-2">
+        {/* <section className="space-y-2">
           <h4 className="font-semibold text-slate-900">Overview</h4>
           <p>
             Act as a professional <strong>UI/UX Consultant</strong>. Interact
@@ -22,7 +22,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
             <em>Concrete Improvements</em>
             and <em>User Psychology</em>.
           </p>
-        </section>
+        </section> */}
 
         {/* 回答が良かったら、報酬がさらに多いタスクに招待されますというセンテンスを追加 */}
         <section className="space-y-2">
