@@ -144,6 +144,9 @@ export function CaptionForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 画像表示エリア */}
+          <p className="px-3 pt-3 text-xs text-red-500">
+            Pressing any buttons here will not send data outside this page.
+          </p>
           <div className="space-y-2 border border-black">
             {/* <Label className="text-sm font-medium text-slate-700">Image</Label> */}
             {/* <ImageDisplay imageUrl={imageUrl} /> */}
