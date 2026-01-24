@@ -26,6 +26,7 @@ export function TaskPageContent() {
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
   const [taskNumber, setTaskNumber] = useState<number | null>(nextTaskNumber);
   const [hasLoggedAccess, setHasLoggedAccess] = useState(false);
+  const sessionId = searchParams.get("sessionId") || "";
 
   const workerId = searchParams.get("workerId") || "";
   const assignmentId = searchParams.get("assignmentId") || "";
@@ -188,7 +189,7 @@ export function TaskPageContent() {
                 Your completion code:
               </p>
               <p className="text-xl font-mono font-bold text-slate-900">
-                {completionCode}
+                {sessionId ? "CIXH42P7" : completionCode}
               </p>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
