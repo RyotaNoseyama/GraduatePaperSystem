@@ -63,22 +63,23 @@ export function getCurrentDayIdx(): number {
 }
 
 export function generateCompletionCode(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const segments = [4, 4, 4];
-  const code = segments
-    .map((len) => {
-      let segment = "";
-      for (let i = 0; i < len; i++) {
-        segment += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return segment;
-    })
-    .join("-");
+  // const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  // const segments = [4, 4, 4];
+  // const code = segments
+  //   .map((len) => {
+  //     let segment = "";
+  //     for (let i = 0; i < len; i++) {
+  //       segment += chars.charAt(Math.floor(Math.random() * chars.length));
+  //     }
+  //     return segment;
+  //   })
+  //   .join("-");
 
-  // 真ん中の文字（7文字目、ハイフンを含めると8文字目）を'S'に固定
-  const codeArray = code.split("");
-  codeArray[12] = "A"; // XXXX-XXSX-XXAX の A
-  codeArray[13] = "B"; // XXXX-XXXX-XXXB の B
+  // // 真ん中の文字（7文字目、ハイフンを含めると8文字目）を'S'に固定
+  // const codeArray = code.split("");
+  // codeArray[12] = "A"; // XXXX-XXSX-XXAX の A
+  // codeArray[13] = "B"; // XXXX-XXXX-XXXB の B
 
-  return `COMP-${codeArray.join("")}`;
+  // return `COMP-${codeArray.join("")}`;
+  return "COMP-ESGT-GRAD-ETAB";
 }
