@@ -33,19 +33,19 @@ export function Instructions({ groupInfo }: InstructionsProps) {
           </p>
         </section>
 
-        {/* <section className="space-y-2">
+        <section className="space-y-2">
           <h4 className="font-semibold text-slate-900">Schedule</h4>
           <ul className="list-disc pl-5 space-y-1">
             <li>
               Tasks will be published daily from{" "}
-              <strong>9 AM to 9 PM (US Time)</strong>.
+              <strong>5 AM to 5 PM (UTC)</strong>.
             </li>
             <li>
               A new task will be released every day for the next
-              <strong> 7 days starting today</strong>.
+              <strong> 7 days starting tomorrow</strong>.
             </li>
           </ul>
-        </section> */}
+        </section>
 
         <section className="space-y-3">
           <h4 className="font-semibold text-slate-900">Instructions</h4>
@@ -56,6 +56,10 @@ export function Instructions({ groupInfo }: InstructionsProps) {
             <p>
               Click buttons and type text to navigate the site. Find specific
               points where users might struggle or get frustrated.
+            </p>
+            <p>
+              Your report will be evaluated on both its theoretical reasoning
+              and the emotional insight it demonstrates.
             </p>
           </div>
 
