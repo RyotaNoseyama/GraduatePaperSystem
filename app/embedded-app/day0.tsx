@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 import { ShoppingCart, Star, X } from "lucide-react";
+
+const disabledNavLinks = ["Home", "Products", "About"];
 
 export default function Day0Page() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAddToCart = () => {
     alert("Done");
+  };
+
+  const handleDisabledNavClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
   };
 
   const handleSubscribeClick = () => {
@@ -24,15 +31,17 @@ export default function Day0Page() {
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
           <div className="text-xl font-semibold tracking-tight">ShopOne</div>
           <nav className="flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#" className="hover:text-slate-900">
-              Home
-            </a>
-            <a href="#" className="hover:text-slate-900">
-              Products
-            </a>
-            <a href="#" className="hover:text-slate-900">
-              About
-            </a>
+            {disabledNavLinks.map((label) => (
+              <a
+                key={label}
+                href="#"
+                aria-disabled="true"
+                onClick={handleDisabledNavClick}
+                className="text-slate-500 transition hover:text-slate-700 hover:cursor-not-allowed"
+              >
+                {label}
+              </a>
+            ))}
           </nav>
         </div>
       </header>
