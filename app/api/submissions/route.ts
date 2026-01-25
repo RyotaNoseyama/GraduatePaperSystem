@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
         taskNumber: resolvedTaskNumber,
         answer: trimmedCaption,
         rtMs: rtMs || null,
-        completionCode: completionCode,
+        completionCode: "C1PLT1QX",
       },
     });
 

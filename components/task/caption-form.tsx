@@ -169,6 +169,7 @@ export function CaptionForm({
                 {countWords(caption)} words (minimum {MIN_WORDS})
               </span>
             </div>
+            please write in English.
             <Textarea
               id="caption"
               value={caption}

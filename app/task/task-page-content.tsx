@@ -189,7 +189,7 @@ export function TaskPageContent() {
                 Your completion code:
               </p>
               <p className="text-xl font-mono font-bold text-slate-900">
-                {sessionId ? "CIXH42P7" : completionCode}
+                {sessionId ? "C1PLT1QX" : completionCode}
               </p>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
