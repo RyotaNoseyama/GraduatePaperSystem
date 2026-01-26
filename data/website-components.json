@@ -1,0 +1,80 @@
+[
+  {
+    "page": "day0",
+    "components": [
+      "Top navigation with disabled Home/Products/About links that prevent interaction.",
+      "Product hero showing wireless headphones image, price, badges, description, and feature bullets.",
+      "Social proof row with five filled star icons and review count.",
+      "CTA card advertising a limited-time subscription perk plus primary and secondary buttons (Subscribe & Add to Cart).",
+      "Footer containing privacy/terms/support links and current-year copyright text.",
+      "Modal subscription form (email input + confirm button) triggered by the CTA, closeable via X button."
+    ]
+  },
+  {
+    "page": "day1",
+    "components": [
+      "Hotel landing header with StayComfort brand and Rooms/Dining/Contact links.",
+      "Property showcase card featuring suite image, pricing, and descriptive copy.",
+      "Custom calendar widget that lets users pick a start/end date, highlights assumed today (15), and enforces single-range logic.",
+      "Booking button with loading spinner; shows alert error if range includes past dates, otherwise success message.",
+      "Helper copy explaining availability confirmation and concierge follow-up."
+    ]
+  },
+  {
+    "page": "day2",
+    "components": [
+      "Settings sidebar highlighting the Notifications section.",
+      "Config card for flag USR_CFG_EMAIL_NOTIF_BOOL_V2 with metadata text.",
+      "Binary toggle switch updating a numeric state indicator.",
+      "Save Changes button with loading state that ends with a simulated fatal exception alert."
+    ]
+  },
+  {
+    "page": "day3",
+    "components": [
+      "Compose panel with textarea for drafting a post, Save button using Save icon, and alert on successful publish.",
+      "Recent Posts feed listing author name, handle, relative timestamp, and message text for each post.",
+      "New posts prepend instantly to the timeline state."
+    ]
+  },
+  {
+    "page": "day4",
+    "components": [
+      "PortalX nav bar with Help link.",
+      "Onboarding form featuring nickname and user ID fields plus field labels beneath inputs.",
+      "Pre-checked Terms of Service checkbox controlling consent state.",
+      "Register button that alerts success and Cancel button that clears both fields.",
+      "Sign-in prompt link for existing users."
+    ]
+  },
+  {
+    "page": "day5",
+    "components": [
+      "Header showing StreamPlus branding and signed-in avatar.",
+      "Subscription status card with crown icon, Premium 4K plan title, and stats (next billing date, devices linked).",
+      "Disabled Cancel Subscription link that, after confirmation, surfaces an error banner with lock code.",
+      "Benefit description paragraph outlining plan perks.",
+      "Primary CTA button (Keep My Benefits & Stay Premium) with bounce animation triggering a confirmation alert."
+    ]
+  },
+  {
+    "page": "day6",
+    "components": [
+      "SkyVault header containing brand badge, centered search bar with icon, and user profile chip.",
+      "Sidebar navigation listing My Files, Shared, Trash with item counts.",
+      "Main panel listing files (icon, name, sync status, date, size) with selectable rows.",
+      "Deprovision Asset button that requires a confirmation dialog then removes the selected file and shows an alert.",
+      "Initial dataset of three files covering doc, image, and sheet types."
+    ]
+  },
+  {
+    "page": "day7",
+    "components": [
+      "Hero section with pizza photo, overlay badge, and descriptive header text.",
+      "Size Selection list rendered as checkboxes but enforced single-choice; selecting a size resets toppings.",
+      "Topping Selection grid where each button toggles independently, showing a filled dot when active.",
+      "Current Build summary card reflecting chosen size and toppings plus explanatory note about resets.",
+      "Add to Order gradient button that fires a completion alert."
+    ]
+  }
+]

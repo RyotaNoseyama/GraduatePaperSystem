@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPreviousSubmission } from "@/lib/feedback-data";
+import { getPreviousSubmission, getWorkerCondition } from "@/lib/feedback-data";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     }
 
     const previousSubmission = await getPreviousSubmission(workerId);
+    const workerCondition = await getWorkerCondition(workerId);
 
     // previousSubmission can be either full data or just { nextTaskNumber }
     const taskNumber =
@@ -26,12 +27,14 @@ export async function GET(request: NextRequest) {
       previousSubmission,
       taskNumber,
       nextTaskNumber,
+      workerCondition,
     });
 
     return NextResponse.json({
       previousSubmission,
       taskNumber,
       nextTaskNumber,
+      workerCondition,
     });
   } catch (error) {
     console.error("Feedback error:", error);

@@ -34,7 +34,7 @@ const MAX_WORDS = 500;
 
 // デフォルト値として Day2-7 からランダムに選ぶ
 function getDefaultTaskNumber(): number {
-  const defaultTasks = [2, 3, 4, 5, 6, 7];
+  const defaultTasks = [1, 2, 3, 4, 5, 6, 7];
   return defaultTasks[Math.floor(Math.random() * defaultTasks.length)];
 }
 
@@ -124,8 +124,8 @@ export function CaptionForm({
       console.log("Total interactions recorded:", interactions.length);
       console.log("Interaction data:", interactions);
 
-      // const usedTaskNumber = (taskNumber ?? defaultTask)!;
-      const usedTaskNumber = 0;
+      const usedTaskNumber = (taskNumber ?? defaultTask)!;
+      // const usedTaskNumber = 0;
       await onSubmit(caption, rtMs, usedTaskNumber);
     } catch (error) {
       console.error("Submission error:", error);

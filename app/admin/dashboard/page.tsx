@@ -19,16 +19,65 @@ interface Submission {
   submittedAt: string | null;
 }
 
+type SubmissionProcessResult = {
+  submissionId: string;
+  success: boolean;
+  openaiResponse?: string;
+  error?: string;
+};
+
+async function processSubmissionsSequentially(
+  submissions: Submission[],
+  prompt?: string,
+): Promise<SubmissionProcessResult[]> {
+  const results: SubmissionProcessResult[] = [];
+
+  for (const submission of submissions) {
+    try {
+      const response = await fetch("/api/admin/openai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          submissionId: submission.id,
+          prompt: prompt || undefined,
+        }),
+      });
+
+      const data = await response.json();
+      results.push({
+        submissionId: submission.id,
+        success: response.ok,
+        openaiResponse: data.openaiResponse,
+        error: response.ok ? undefined : data.error || "Unknown error",
+      });
+    } catch (error) {
+      results.push({
+        submissionId: submission.id,
+        success: false,
+        error: error instanceof Error ? error.message : "Unexpected error",
+      });
+    }
+  }
+
+  return results;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [adminId, setAdminId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [selectedSubmission, setSelectedSubmission] = useState<string>("");
+  const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([]);
   const [customPrompt, setCustomPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResponse, setAiResponse] = useState("");
   const [dayIdxFilter, setDayIdxFilter] = useState<string>("");
+  const pendingSubmissions = submissions.filter(
+    (submission) => submission.scoreA === null,
+  );
+  const scoredSubmissions = submissions.filter(
+    (submission) => submission.scoreA !== null,
+  );
 
   useEffect(() => {
     // クライアント側でトークンを検証するのは簡略化のため
@@ -54,6 +103,7 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setSubmissions(data.submissions || []);
+        setSelectedSubmissions([]);
       }
     } catch (error) {
       console.error("Failed to fetch submissions:", error);
@@ -63,6 +113,14 @@ export default function AdminDashboard() {
 
   const handleSearchByDay = async () => {
     await fetchSubmissions();
+  };
+
+  const toggleSubmissionSelection = (submissionId: string) => {
+    setSelectedSubmissions((prev) =>
+      prev.includes(submissionId)
+        ? prev.filter((id) => id !== submissionId)
+        : [...prev, submissionId],
+    );
   };
 
   const handleSendDayToOpenAI = async () => {
@@ -120,7 +178,7 @@ export default function AdminDashboard() {
   };
 
   const handleSendToOpenAI = async () => {
-    if (!selectedSubmission) {
+    if (selectedSubmissions.length === 0) {
       toast.error("提出を選択してください");
       return;
     }
@@ -129,25 +187,28 @@ export default function AdminDashboard() {
     setAiResponse("");
 
     try {
-      const response = await fetch("/api/admin/openai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          submissionId: selectedSubmission,
-          prompt: customPrompt || undefined,
-        }),
-      });
+      const targetSubmissions = submissions.filter((submission) =>
+        selectedSubmissions.includes(submission.id),
+      );
 
-      const data = await response.json();
+      const results = await processSubmissionsSequentially(
+        targetSubmissions,
+        customPrompt || undefined,
+      );
 
-      if (response.ok) {
-        setAiResponse(data.openaiResponse);
-        toast.success("OpenAI APIの処理が完了しました");
-      } else {
-        toast.error(data.error || "処理に失敗しました");
-      }
+      const successCount = results.filter((result) => result.success).length;
+      const summary = results
+        .map((result, index) => {
+          const status = result.success ? "OK" : "NG";
+          const detail = result.openaiResponse || result.error || "";
+          return `#${index + 1} ${status} (${result.submissionId})\n${detail}`;
+        })
+        .join("\n\n");
+
+      setAiResponse(summary);
+      toast.success(
+        `${successCount}/${results.length} 件の Submission を処理しました`,
+      );
     } catch (error) {
       console.error("OpenAI API error:", error);
       toast.error("OpenAI APIの呼び出しに失敗しました");
@@ -200,7 +261,7 @@ export default function AdminDashboard() {
                   <Button variant="outline" onClick={handleSearchByDay}>
                     検索
                   </Button>
-                  <Button
+                  {/* <Button
                     onClick={handleSendDayToOpenAI}
                     disabled={!dayIdxFilter || isProcessing}
                   >
@@ -215,7 +276,7 @@ export default function AdminDashboard() {
                         この日のSubmissionを一括送信
                       </>
                     )}
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
             </CardContent>
@@ -248,23 +309,84 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-slate-600 mb-4">提出データの管理</p>
+              未採点の件数：{pendingSubmissions.length}
               <div className="space-y-4">
                 <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                  {submissions.length === 0 ? (
+                  {pendingSubmissions.length === 0 ? (
                     <p className="text-sm text-slate-500">
                       提出データがありません
                     </p>
                   ) : (
                     <div className="space-y-2">
-                      {submissions.map((submission) => (
+                      {pendingSubmissions.map((submission) => {
+                        const isSelected = selectedSubmissions.includes(
+                          submission.id,
+                        );
+                        return (
+                          <div
+                            key={submission.id}
+                            onClick={() =>
+                              toggleSubmissionSelection(submission.id)
+                            }
+                            className={`p-3 border rounded cursor-pointer transition-colors ${
+                              isSelected
+                                ? "border-blue-500 bg-blue-50"
+                                : "hover:bg-slate-50"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">
+                                  Worker: {submission.workerId}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  Day: {submission.dayIdx} | Score A:{" "}
+                                  {submission.scoreA ?? "N/A"} | Score B:{" "}
+                                  {submission.scoreB ?? "N/A"}
+                                </p>
+                                <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                                  {submission.answer}
+                                </p>
+                              </div>
+                              <span
+                                className={`text-xs font-semibold ${
+                                  isSelected
+                                    ? "text-blue-600"
+                                    : "text-slate-400"
+                                }`}
+                              >
+                                {isSelected ? "Selected" : "Tap to select"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Scored Submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-slate-600 mb-4">scoreAが入力済みの提出一覧</p>
+              採点済みの件数：{scoredSubmissions.length}
+              <div className="space-y-4">
+                <div className="max-h-60 overflow-y-auto border rounded-md p-2">
+                  {scoredSubmissions.length === 0 ? (
+                    <p className="text-sm text-slate-500">
+                      採点済みの提出がありません
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {scoredSubmissions.map((submission) => (
                         <div
                           key={submission.id}
-                          onClick={() => setSelectedSubmission(submission.id)}
-                          className={`p-3 border rounded cursor-pointer transition-colors ${
-                            selectedSubmission === submission.id
-                              ? "border-blue-500 bg-blue-50"
-                              : "hover:bg-slate-50"
-                          }`}
+                          className="p-3 border rounded bg-white"
                         >
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -273,13 +395,16 @@ export default function AdminDashboard() {
                               </p>
                               <p className="text-xs text-slate-500">
                                 Day: {submission.dayIdx} | Score A:{" "}
-                                {submission.scoreA || "N/A"} | Score B:{" "}
-                                {submission.scoreB || "N/A"}
+                                {submission.scoreA ?? "N/A"} | Score B:{" "}
+                                {submission.scoreB ?? "N/A"}
                               </p>
                               <p className="text-xs text-slate-600 mt-1 line-clamp-2">
                                 {submission.answer}
                               </p>
                             </div>
+                            <span className="text-xs font-semibold text-green-600">
+                              Scored
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -301,14 +426,14 @@ export default function AdminDashboard() {
                     選択されたSubmission ID
                   </label>
                   <Input
-                    value={selectedSubmission}
+                    value={selectedSubmissions.join(", ")}
                     readOnly
                     placeholder="上から提出を選択してください"
                     className="bg-slate-50"
                   />
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="text-sm font-medium mb-2 block">
                     カスタムプロンプト（オプション）
                   </label>
@@ -318,11 +443,11 @@ export default function AdminDashboard() {
                     placeholder="デフォルト: 以下の回答を評価してください。回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。"
                     rows={4}
                   />
-                </div>
+                </div> */}
 
                 <Button
                   onClick={handleSendToOpenAI}
-                  disabled={!selectedSubmission || isProcessing}
+                  disabled={selectedSubmissions.length === 0 || isProcessing}
                   className="w-full"
                 >
                   {isProcessing ? (

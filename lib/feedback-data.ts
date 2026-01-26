@@ -22,6 +22,23 @@ export interface PreviousSubmissionData {
   nextTaskNumber: number | null;
 }
 
+export async function getWorkerCondition(
+  workerId: string,
+): Promise<number | null> {
+  const workerResult = await prisma.$queryRaw<{ cond: number | null }[]>`
+    SELECT cond
+    FROM participants
+    WHERE worker_id = ${workerId}
+    LIMIT 1
+  `;
+
+  if (workerResult.length === 0) {
+    return null;
+  }
+
+  return workerResult[0].cond;
+}
+
 export function isFirstDay(): boolean {
   const todayIdx = getCurrentDayIdx();
   const yesterdayIdx = todayIdx - 1;

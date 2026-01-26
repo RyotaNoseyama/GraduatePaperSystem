@@ -1,0 +1,72 @@
+{
+  "day1": {
+    "visual_issues": [
+      "The 'Add to Cart' button looks disabled (gray) and secondary",
+      "The 'Subscribe' button distractingly looks like the primary action (red/pulsing)"
+    ],
+    "functional_issues": [
+      "Clicking 'Add to Cart' shows only a vague 'Done' alert without product details"
+    ]
+  },
+  "day2": {
+    "visual_issues": [
+      "The calendar navigation arrows are swapped (Next is on the left, Previous is on the right)"
+    ],
+    "functional_issues": [
+      "Past dates are selectable and only trigger an error after clicking 'Book Now'"
+    ]
+  },
+  "day3": {
+    "visual_issues": [
+      "Labels display raw internal variable names (e.g., USR_CFG_EMAIL) instead of human language",
+      "Toggle switch states are displayed as '1' or '0' instead of 'On' or 'Off'"
+    ],
+    "functional_issues": [
+      "Saving changes triggers a cryptic system error code (0x8004...) with no solution"
+    ]
+  },
+  "day4": {
+    "visual_issues": [
+      "The action button is misleadingly labeled 'Save' with a floppy disk icon"
+    ],
+    "functional_issues": [
+      "The post is published immediately to the public timeline without confirmation",
+      "There is no option to delete or edit the post (Lack of Undo)"
+    ]
+  },
+  "day5": {
+    "visual_issues": [
+      "Labels are positioned confusingly below the input fields, violating proximity principles"
+    ],
+    "functional_issues": [
+      "The button styled as 'Primary' (Blue/Right) acts as a 'Reset' button that clears all data"
+    ]
+  },
+  "day6": {
+    "visual_issues": [
+      "The 'Cancel Subscription' button is designed to look unclickable (gray text/opacity)",
+      "The visual hierarchy tricks users into focusing on the 'Keep Plan' button"
+    ],
+    "functional_issues": [
+      "The cancellation process leads to a fake system error (Dead End) preventing exit"
+    ]
+  },
+  "day7": {
+    "visual_issues": [
+      "The delete button uses confusing jargon ('Deprovision') instead of 'Delete'",
+      "The delete button uses positive styling (Blue color/Zap icon) implies a safe action"
+    ],
+    "functional_issues": [
+      "The confirmation dialog is ambiguous ('Commit transaction?') and results in permanent deletion"
+    ]
+  },
+  "day8": {
+    "visual_issues": [
+      "Checkboxes (square) are used for single-choice selection (Size)",
+      "Radio buttons (round) are used for multiple-choice selection (Toppings)"
+    ],
+    "functional_issues": [
+      "Changing the pizza size silently wipes out all selected toppings without warning"
+    ]
+  }
+}

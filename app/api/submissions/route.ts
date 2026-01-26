@@ -30,7 +30,11 @@ export async function GET(request: NextRequest) {
     const dayIdx = searchParams.get("dayIdx");
     const workerId = searchParams.get("workerId");
 
-    const where: any = {};
+    const where: any = {
+      participant: {
+        cond: 1,
+      },
+    };
     if (dayIdx) {
       where.dayIdx = parseInt(dayIdx);
     }
@@ -176,6 +180,8 @@ export async function POST(request: NextRequest) {
     let resolvedTaskNumber: number;
     if (typeof taskNumber === "number") {
       const available = await getAvailableTaskNumbers(workerId);
+      console.log("Available task numbers for", workerId, ":", available);
+      console.log("Requested task number:", taskNumber);
       if (!available.includes(taskNumber)) {
         return NextResponse.json(
           { error: "Invalid or already used task number" },

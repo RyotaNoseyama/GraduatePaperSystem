@@ -36,6 +36,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
   const [error, setError] = useState<string | null>(null);
   const [taskNumber, setTaskNumber] = useState<number | null>(null);
   const [nextTaskNumber, setNextTaskNumber] = useState<number | null>(null);
+  const [workerCondition, setWorkerCondition] = useState<number | null>(null);
 
   const workerId = searchParams.get("workerId") || "";
 
@@ -66,6 +67,11 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
         setPreviousSubmission(data.previousSubmission ?? null);
         setTaskNumber(data.taskNumber ?? null);
         setNextTaskNumber(data.nextTaskNumber ?? null);
+        setWorkerCondition(
+          typeof data.workerCondition === "number"
+            ? data.workerCondition
+            : null,
+        );
       } catch (err) {
         setError("Network error while loading feedback.");
       } finally {
@@ -83,6 +89,11 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
         ? (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0)
         : "--"
     : "--";
+
+  const thankYouMessage =
+    "Thank you for your previous submission. We look forward to working with you again today.";
+  const shouldShowThankYou = !isLoading && workerCondition === 2;
+  const shouldHideDetails = !isLoading && workerCondition === 2;
 
   // Select the appropriate page component based on taskNumber
   const getDayComponent = () => {
@@ -127,39 +138,57 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
 
       <div className="grid gap-6">
         {/* Previous day's website display */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Previous Day&apos;s Website</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full  border rounded-lg overflow-hidden">
-              {getDayComponent()}
-            </div>
-          </CardContent>
-        </Card>
+        {!shouldHideDetails && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Previous Day&apos;s Website</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full  border rounded-lg overflow-hidden">
+                {getDayComponent()}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Score and feedback display */}
         <Card>
           <CardHeader>
-            <CardTitle>Evaluation of Your Response</CardTitle>
+            {!shouldHideDetails && (
+              <CardTitle>Evaluation of Your Response</CardTitle>
+            )}
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div>
-                <h3 className="font-semibold mb-2">
-                  Score (score_a + score_b)
-                </h3>
-                <div className="text-4xl font-bold text-blue-600">
-                  {isLoading ? "Loading..." : scoreLabel}
+              {!shouldHideDetails && !isLoading && (
+                <div>
+                  <h3 className="font-semibold mb-2">
+                    Score (out of 12 points)
+                  </h3>
+                  <div className="text-4xl font-bold text-blue-600">
+                    {scoreLabel}
+                  </div>
+                  {!previousSubmission && (
+                    <p className="text-sm text-slate-600 mt-1">
+                      No score available yet. Please check back after your
+                      first submission.
+                    </p>
+                  )}
                 </div>
-                {!previousSubmission && !isLoading && (
-                  <p className="text-sm text-slate-600 mt-1">
-                    No score available yet. Please check back after your first
-                    submission.
-                  </p>
-                )}
-                {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
-              </div>
+              )}
+              {!shouldHideDetails && isLoading && (
+                <div>
+                  <h3 className="font-semibold mb-2">
+                    Score (out of 12 points)
+                  </h3>
+                  <div className="text-sm text-gray-500 italic">
+                    Loading score...
+                  </div>
+                </div>
+              )}
+              {!shouldHideDetails && error && !isLoading && (
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+              )}
 
               <div>
                 <h3 className="font-semibold mb-2">Feedback</h3>
@@ -167,12 +196,15 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
                   {isLoading && (
                     <p className="text-gray-500 italic">Loading feedback...</p>
                   )}
-                  {!isLoading && previousSubmission?.feedback && (
+                  {shouldShowThankYou && (
+                    <p className="text-gray-800">{thankYouMessage}</p>
+                  )}
+                  {!isLoading && workerCondition !== 2 && previousSubmission?.feedback && (
                     <p className="text-gray-800 whitespace-pre-line">
                       {previousSubmission.feedback}
                     </p>
                   )}
-                  {!isLoading && !previousSubmission?.feedback && (
+                  {!isLoading && workerCondition !== 2 && !previousSubmission?.feedback && (
                     <p className="text-gray-500 italic">
                       Feedback is not available yet.
                     </p>

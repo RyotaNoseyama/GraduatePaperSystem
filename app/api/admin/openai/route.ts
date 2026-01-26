@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import OpenAI from "openai";
 import { verifyAdminToken } from "@/lib/admin-auth";
+import { buildEvaluationPrompt } from "@/lib/evaluation-prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -45,15 +46,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // デフォルトのプロンプトまたはカスタムプロンプトを使用
-    const systemPrompt =
-      prompt ||
-      `以下の回答を評価してください。
-回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。`;
+    const customPrompt = typeof prompt === "string" ? prompt.trim() : "";
+    const hasCustomPrompt = customPrompt.length > 0;
+    const systemPrompt = hasCustomPrompt
+      ? customPrompt
+      : await buildEvaluationPrompt({
+          taskNumber: submission.taskNumber ?? null,
+          workerAnswer: submission.answer,
+        });
+    const userMessageContent = hasCustomPrompt
+      ? submission.answer
+      : "上記の指示に従って、指定されたJSONのみを出力してください。";
 
     // OpenAI APIを呼び出し
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         {
           role: "system",
@@ -61,10 +68,10 @@ export async function POST(request: NextRequest) {
         },
         {
           role: "user",
-          content: submission.answer,
+          content: userMessageContent,
         },
       ],
-      temperature: 0.7,
+      temperature: 0.2,
       max_tokens: 1000,
     });
 
@@ -136,17 +143,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const systemPrompt =
-      prompt ||
-      `以下の回答を評価してください。
-回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。`;
+    const customPrompt = typeof prompt === "string" ? prompt.trim() : "";
+    const hasCustomPrompt = customPrompt.length > 0;
 
     // 各submissionをOpenAI APIで処理
     const results = await Promise.all(
       submissions.map(async (submission) => {
         try {
+          const systemPrompt = hasCustomPrompt
+            ? customPrompt
+            : await buildEvaluationPrompt({
+                taskNumber: submission.taskNumber ?? null,
+                workerAnswer: submission.answer,
+              });
+          const userMessageContent = hasCustomPrompt
+            ? submission.answer
+            : "上記の指示に従って、指定されたJSONのみを出力してください。";
+
           const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
+            model: "gpt-4o",
             messages: [
               {
                 role: "system",
@@ -154,10 +169,10 @@ export async function PUT(request: NextRequest) {
               },
               {
                 role: "user",
-                content: submission.answer,
+                content: userMessageContent,
               },
             ],
-            temperature: 0.7,
+            temperature: 0.2,
             max_tokens: 1000,
           });
 

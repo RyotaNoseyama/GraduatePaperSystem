@@ -1,0 +1,34 @@
+{
+  "day0": {
+    "visual_issue": "The 'Add to Cart' button looks disabled, while the 'Subscribe' button looks primary.",
+    "functional_issue": "Clicking 'Add to Cart' provides only a vague 'Done' feedback without details."
+  },
+  "day1": {
+    "visual_issue": "The calendar navigation arrows are visually swapped (Next is on the left).",
+    "functional_issue": "The system allows selecting past dates and errors out only after submission."
+  },
+  "day2": {
+    "visual_issue": "Labels display raw internal variable names (e.g., USR_CFG) instead of natural language.",
+    "functional_issue": "Saving changes triggers a cryptic system error code (0x8004...) with no solution."
+  },
+  "day3": {
+    "visual_issue": "The 'Post' button is misleadingly labeled 'Save' with a floppy disk icon.",
+    "functional_issue": "Content is published immediately without confirmation and cannot be deleted (No Undo)."
+  },
+  "day4": {
+    "visual_issue": "Labels are positioned confusingly below the input fields, violating proximity principles.",
+    "functional_issue": "The prominent primary button acts as a 'Reset' trap that clears all inputs."
+  },
+  "day5": {
+    "visual_issue": "The 'Cancel Subscription' button is visually disguised as unclickable text.",
+    "functional_issue": "The cancellation flow leads to a fake system error (Dead End) preventing exit."
+  },
+  "day6": {
+    "visual_issue": "The delete button uses confusing jargon ('Deprovision') and positive blue styling.",
+    "functional_issue": "The confirmation dialog is ambiguous ('Commit transaction?') and results in deletion."
+  },
+  "day7": {
+    "visual_issue": "Single-choice options (Size) use square checkboxes; Multi-choice options (Toppings) use round radios.",
+    "functional_issue": "Changing the size silently resets all selected toppings without warning."
+  }
+}
