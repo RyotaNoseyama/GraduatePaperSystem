@@ -25,13 +25,13 @@ export function Instructions({ groupInfo }: InstructionsProps) {
         </section> */}
 
         {/* 回答が良かったら、報酬がさらに多いタスクに招待されますというセンテンスを追加 */}
-        <section className="space-y-2">
+        {/* <section className="space-y-2">
           <h4 className="font-semibold text-slate-900">Rewards</h4>
           <p>
             If your review is particularly insightful and helpful, you may be
             invited to participate in tasks with higher rewards.
           </p>
-        </section>
+        </section> */}
 
         <section className="space-y-2">
           <h4 className="font-semibold text-slate-900">Schedule</h4>
@@ -42,7 +42,7 @@ export function Instructions({ groupInfo }: InstructionsProps) {
             </li>
             <li>
               A new task will be released every day for the next
-              <strong> 7 days starting tomorrow</strong>.
+              <strong> 7 days </strong>.
             </li>
           </ul>
         </section>

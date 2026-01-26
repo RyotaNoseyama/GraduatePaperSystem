@@ -154,10 +154,10 @@ export function TaskPageContent() {
     );
   }
 
-  // taskNumber取得中はローディング表示
-  // if (taskNumber === null) {
-  //   return <Loading />;
-  // }
+  //taskNumber取得中はローディング表示
+  if (taskNumber === null) {
+    return <Loading />;
+  }
 
   if (hasSubmitted && completionCode) {
     const groupMessage = groupInfo ? getGroupMessage(groupInfo!) : null;
@@ -189,7 +189,7 @@ export function TaskPageContent() {
                 Your completion code:
               </p>
               <p className="text-xl font-mono font-bold text-slate-900">
-                {sessionId ? "C1PLT1QX" : completionCode}
+                {sessionId ? "C12BC048" : completionCode} {/* ここ変更 */}
               </p>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
@@ -236,7 +236,7 @@ export function TaskPageContent() {
         <div className="space-y-6">
           <Instructions groupInfo={groupInfo} />
           {/* このボタンは、day1以降で表示 */}
-          {/* <div className="mb-6">
+          <div className="mb-6">
             <Button
               onClick={handleBackToFeedback}
               className="mb-4 bg-blue-600 hover:bg-blue-700 text-white"
@@ -244,7 +244,7 @@ export function TaskPageContent() {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Feedback
             </Button>
-          </div> */}
+          </div>
           <CaptionForm
             onSubmit={handleSubmit}
             disabled={isPreview}
