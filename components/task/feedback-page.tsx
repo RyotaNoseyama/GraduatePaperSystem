@@ -86,9 +86,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     ? previousSubmission.scoreSum !== null
       ? previousSubmission.scoreSum
       : (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0) > 0
-        ? (previousSubmission.scoreA ?? 0) +
-          (previousSubmission.scoreB ?? 0) +
-          2
+        ? (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0)
         : "--"
     : "--";
 
@@ -168,7 +166,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
                     Score (out of 14 points)
                   </h3>
                   <div className="text-4xl font-bold text-blue-600">
-                    {scoreLabel}
+                    {typeof scoreLabel === "number" ? scoreLabel + 2 : scoreLabel}
                   </div>
                   {!previousSubmission && (
                     <p className="text-sm text-slate-600 mt-1">
