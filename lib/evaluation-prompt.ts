@@ -5,7 +5,10 @@ import websiteComponents, {
 } from "@/data/website-components";
 import intendedIssues from "@/data/intended_issues.json";
 
-type IntendedIssuesRecord = Record<string, string[]>;
+type IntendedIssuesRecord = Record<
+  string,
+  { visual_issue: string; functional_issue: string }
+>;
 
 const PROMPT_PATH = path.join(process.cwd(), "data", "prompt.md");
 const intendedIssuesMap = intendedIssues as IntendedIssuesRecord;
@@ -61,7 +64,11 @@ function getIntendedIssues(taskNumber?: number | null): string[] {
 
   const key = `day${taskNumber + 1}`;
   const issues = intendedIssuesMap[key];
-  return Array.isArray(issues) ? issues : [];
+  if (!issues) {
+    return [];
+  }
+
+  return [issues.visual_issue, issues.functional_issue].filter(Boolean);
 }
 
 export async function buildEvaluationPrompt(params: {
