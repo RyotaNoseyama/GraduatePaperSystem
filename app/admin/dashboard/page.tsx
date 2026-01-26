@@ -23,7 +23,24 @@ type SubmissionProcessResult = {
   submissionId: string;
   success: boolean;
   openaiResponse?: string;
+  parsedResponse?: OpenAIResponse;
   error?: string;
+};
+
+type OpenAIResponse = {
+  is_relevant: boolean;
+  scores: {
+    theory_breakdown: number[];
+    theory_total: number;
+    human_breakdown: {
+      empathy: number;
+      context: number;
+    };
+    human_total: number;
+    grand_total: number;
+  };
+  feedback_title: string;
+  feedback_content: string;
 };
 
 async function processSubmissionsSequentially(
@@ -44,10 +61,19 @@ async function processSubmissionsSequentially(
       });
 
       const data = await response.json();
+      let parsedResponse: OpenAIResponse | undefined;
+      if (response.ok && data.openaiResponse) {
+        try {
+          parsedResponse = JSON.parse(data.openaiResponse) as OpenAIResponse;
+        } catch (e) {
+          console.error("Failed to parse OpenAI response:", e);
+        }
+      }
       results.push({
         submissionId: submission.id,
         success: response.ok,
         openaiResponse: data.openaiResponse,
+        parsedResponse,
         error: response.ok ? undefined : data.error || "Unknown error",
       });
     } catch (error) {
@@ -71,6 +97,10 @@ export default function AdminDashboard() {
   const [customPrompt, setCustomPrompt] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResponse, setAiResponse] = useState("");
+  const [processResults, setProcessResults] = useState<
+    SubmissionProcessResult[]
+  >([]);
+  const [isSaving, setIsSaving] = useState(false);
   const [dayIdxFilter, setDayIdxFilter] = useState<string>("");
   const pendingSubmissions = submissions.filter(
     (submission) => submission.scoreA === null,
@@ -177,6 +207,63 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveToDatabase = async () => {
+    if (processResults.length === 0) {
+      toast.error("保存する結果がありません");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      let savedCount = 0;
+      let failedCount = 0;
+
+      for (const result of processResults) {
+        if (result.success && result.parsedResponse) {
+          try {
+            const response = await fetch("/api/admin/submissions/update", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                submissionId: result.submissionId,
+                scoreA: result.parsedResponse.scores.theory_total,
+                scoreB: result.parsedResponse.scores.human_total,
+                feedback: result.parsedResponse.feedback_content,
+              }),
+            });
+
+            if (response.ok) {
+              savedCount++;
+            } else {
+              failedCount++;
+            }
+          } catch (error) {
+            console.error("Failed to save submission:", error);
+            failedCount++;
+          }
+        }
+      }
+
+      if (savedCount > 0) {
+        toast.success(`${savedCount}件をDBに保存しました`);
+        await fetchSubmissions(); // Refresh the submissions list
+        setProcessResults([]);
+        setAiResponse("");
+        setSelectedSubmissions([]);
+      }
+
+      if (failedCount > 0) {
+        toast.error(`${failedCount}件の保存に失敗しました`);
+      }
+    } catch (error) {
+      console.error("Save to database error:", error);
+      toast.error("DBへの保存に失敗しました");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSendToOpenAI = async () => {
     if (selectedSubmissions.length === 0) {
       toast.error("提出を選択してください");
@@ -195,6 +282,8 @@ export default function AdminDashboard() {
         targetSubmissions,
         customPrompt || undefined,
       );
+
+      setProcessResults(results);
 
       const successCount = results.filter((result) => result.success).length;
       const summary = results
@@ -445,23 +534,43 @@ export default function AdminDashboard() {
                   />
                 </div> */}
 
-                <Button
-                  onClick={handleSendToOpenAI}
-                  disabled={selectedSubmissions.length === 0 || isProcessing}
-                  className="w-full"
-                >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      処理中...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      OpenAI APIに送信
-                    </>
+                <div className="space-y-2">
+                  <Button
+                    onClick={handleSendToOpenAI}
+                    disabled={selectedSubmissions.length === 0 || isProcessing}
+                    className="w-full"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        処理中...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        OpenAI APIに送信
+                      </>
+                    )}
+                  </Button>
+
+                  {processResults.length > 0 && (
+                    <Button
+                      onClick={handleSaveToDatabase}
+                      disabled={isSaving}
+                      variant="default"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          保存中...
+                        </>
+                      ) : (
+                        "DBに保存"
+                      )}
+                    </Button>
                   )}
-                </Button>
+                </div>
 
                 {aiResponse && (
                   <div className="mt-4 p-4 bg-slate-50 rounded-md border">

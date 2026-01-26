@@ -6,12 +6,12 @@ Your goal is to grade a "Web UI Improvement Report" submitted by a user (crowdso
 # Input Data
 
 - **Website Context (`website_components`):**
-  {website_components}
-  _(e.g., "Header contains a search bar. Main image is static. Footer has a contact link.")_
+  {website*components}
+  *(e.g., "Header contains a search bar. Main image is static. Footer has a contact link.")\_
 
 - **Intended Issues List (`intended_issues`):**
-  {intended_issues}
-  _(e.g., ["Missing back button (User Control)", "Unhelpful error message (Error Recognition & Recovery)"])_
+  {intended*issues}
+  *(e.g., ["Missing back button (User Control)", "Unhelpful error message (Error Recognition & Recovery)"])\_
 
 - **Worker's Answer (`worker_answer`):**
   {worker_answer}
@@ -22,10 +22,13 @@ Your goal is to grade a "Web UI Improvement Report" submitted by a user (crowdso
 
 Before scoring, check the validity of the answer.
 
-- **Contradiction Detection:** If the worker points out elements not present in `website_components` (e.g., complaining about a "small search bar" when there is no search bar), or states facts that are incorrect, score that item as **0 points**.
+- **Contradiction Detection:** If the worker points out elements not present in `website_components`, or states facts that are incorrect, score that item as **0 points**.
 - **Irrelevance:** Ignore descriptions unrelated to UI/UX.
+- **Participation Check:** If the answer is completely irrelevant or nonsense, `is_relevant` is false and the Grand Total is 0. Otherwise, proceed to scoring with a **Base Score of 2**.
 
-# 2. Scoring Criteria (Max 12 pts)
+# 2. Scoring Criteria (Base 2 pts + Max 12 pts = Max 14 pts)
+
+**Base Score:** To encourage participation, **add 2 points** to the final `grand_total` automatically if the answer is relevant.
 
 ## A. Heuristic Evaluation (Max 6 pts)
 
@@ -42,7 +45,14 @@ The comparison target is `{intended_issues}`, but **even if it is not in the lis
 - **0 points (Invalid):**
   - Off the mark or factually incorrect (contradicts components).
 
-_Note: In the output `theory_breakdown`, input the score corresponding to each item in the provided `{intended_issues}`._
+### **[CRITICAL RULE: Top 2 Selection]**
+
+The worker may identify multiple issues, **but you must ONLY output the scores for the "Top 2" best insights.**
+
+1. Evaluate all points raised by the worker.
+2. Sort them by quality (score).
+3. **Discard everything except the top 2 highest scores.**
+4. Put ONLY these 2 scores into the `theory_breakdown` array.
 
 ## B. Human Insight Evaluation (Max 6 pts)
 
@@ -91,7 +101,7 @@ Output strictly in the following JSON format. Do not use Markdown code blocks.
 {
 "is_relevant": boolean,
 "scores": {
-"theory_breakdown": [int, ...],
+"theory_breakdown": [int, ...], // WARNING: Array must contain MAX 2 integers (The Top 2 scores).
 "theory_total": int,
 "human_breakdown": {
 "empathy": int,
@@ -101,5 +111,5 @@ Output strictly in the following JSON format. Do not use Markdown code blocks.
 "grand_total": int
 },
 "feedback_title": "string (Positive headline under 50 chars in English)",
-"feedback_content": "string (Approx. 200 characters in English. Must include specific advice and the 'Rationale'.)"
+"feedback_content": "string (Approx. 200~300 characters in English. Must include specific advice and the 'Rationale'.)"
 }

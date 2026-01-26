@@ -86,7 +86,9 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
     ? previousSubmission.scoreSum !== null
       ? previousSubmission.scoreSum
       : (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0) > 0
-        ? (previousSubmission.scoreA ?? 0) + (previousSubmission.scoreB ?? 0)
+        ? (previousSubmission.scoreA ?? 0) +
+          (previousSubmission.scoreB ?? 0) +
+          2
         : "--"
     : "--";
 
@@ -163,15 +165,15 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
               {!shouldHideDetails && !isLoading && (
                 <div>
                   <h3 className="font-semibold mb-2">
-                    Score (out of 12 points)
+                    Score (out of 14 points)
                   </h3>
                   <div className="text-4xl font-bold text-blue-600">
                     {scoreLabel}
                   </div>
                   {!previousSubmission && (
                     <p className="text-sm text-slate-600 mt-1">
-                      No score available yet. Please check back after your
-                      first submission.
+                      No score available yet. Please check back after your first
+                      submission.
                     </p>
                   )}
                 </div>
@@ -179,7 +181,7 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
               {!shouldHideDetails && isLoading && (
                 <div>
                   <h3 className="font-semibold mb-2">
-                    Score (out of 12 points)
+                    Score (out of 14 points)
                   </h3>
                   <div className="text-sm text-gray-500 italic">
                     Loading score...
@@ -199,16 +201,20 @@ export function FeedbackPage({ dayNumber = 1 }: FeedbackPageProps) {
                   {shouldShowThankYou && (
                     <p className="text-gray-800">{thankYouMessage}</p>
                   )}
-                  {!isLoading && workerCondition !== 2 && previousSubmission?.feedback && (
-                    <p className="text-gray-800 whitespace-pre-line">
-                      {previousSubmission.feedback}
-                    </p>
-                  )}
-                  {!isLoading && workerCondition !== 2 && !previousSubmission?.feedback && (
-                    <p className="text-gray-500 italic">
-                      Feedback is not available yet.
-                    </p>
-                  )}
+                  {!isLoading &&
+                    workerCondition !== 2 &&
+                    previousSubmission?.feedback && (
+                      <p className="text-gray-800 whitespace-pre-line">
+                        {previousSubmission.feedback}
+                      </p>
+                    )}
+                  {!isLoading &&
+                    workerCondition !== 2 &&
+                    !previousSubmission?.feedback && (
+                      <p className="text-gray-500 italic">
+                        Feedback is not available yet.
+                      </p>
+                    )}
                 </div>
               </div>
             </div>

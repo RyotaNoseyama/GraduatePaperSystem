@@ -54,9 +54,7 @@ export async function POST(request: NextRequest) {
           taskNumber: submission.taskNumber ?? null,
           workerAnswer: submission.answer,
         });
-    const userMessageContent = hasCustomPrompt
-      ? submission.answer
-      : "上記の指示に従って、指定されたJSONのみを出力してください。";
+    const userMessageContent = submission.answer;
 
     // OpenAI APIを呼び出し
     const completion = await openai.chat.completions.create({
@@ -156,9 +154,7 @@ export async function PUT(request: NextRequest) {
                 taskNumber: submission.taskNumber ?? null,
                 workerAnswer: submission.answer,
               });
-          const userMessageContent = hasCustomPrompt
-            ? submission.answer
-            : "上記の指示に従って、指定されたJSONのみを出力してください。";
+          const userMessageContent = submission.answer;
 
           const completion = await openai.chat.completions.create({
             model: "gpt-4o",

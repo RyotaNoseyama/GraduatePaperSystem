@@ -2,79 +2,103 @@
   {
     "page": "day0",
     "components": [
-      "Top navigation with disabled Home/Products/About links that prevent interaction.",
-      "Product hero showing wireless headphones image, price, badges, description, and feature bullets.",
-      "Social proof row with five filled star icons and review count.",
-      "CTA card advertising a limited-time subscription perk plus primary and secondary buttons (Subscribe & Add to Cart).",
-      "Footer containing privacy/terms/support links and current-year copyright text.",
-      "Modal subscription form (email input + confirm button) triggered by the CTA, closeable via X button."
+      "Top navigation bar with logo, disabled Home/Products/About links with cursor-not-allowed styling preventing interaction.",
+      "Product hero section showing high-quality wireless headphones image, price display, promotional badges, descriptive copy, and bulleted feature list.",
+      "Social proof row displaying five filled star rating icons, review count badge, and customer satisfaction metric.",
+      "CTA card promoting limited-time subscription offer with headline, benefit details, primary Subscribe button, and secondary Add to Cart button.",
+      "Footer containing privacy policy, terms of service, support links organized in columns, and current-year copyright text.",
+      "Modal subscription form with email input field, validation feedback, confirm button, and close X button in top-right corner.",
+      "Product comparison table displaying specifications (frequency range in Hz, battery life in hours, connectivity types) across multiple headphone model variants.",
+      "Auto-rotating testimonials carousel with customer quote text, customer profile photo, name, and star rating updated every 5 seconds.",
+      "Prominent limited-time offer banner with countdown timer showing remaining hours, minutes, and seconds in MM:SS format with visual urgency color."
     ]
   },
   {
     "page": "day1",
     "components": [
-      "Hotel landing header with StayComfort brand and Rooms/Dining/Contact links.",
-      "Property showcase card featuring suite image, pricing, and descriptive copy.",
-      "Custom calendar widget that lets users pick a start/end date, highlights assumed today (15), and enforces single-range logic.",
-      "Booking button with loading spinner; shows alert error if range includes past dates, otherwise success message.",
-      "Helper copy explaining availability confirmation and concierge follow-up."
+      "Hotel landing header displaying StayComfort brand logo, primary navigation with Rooms, Dining, and Contact links.",
+      "Property showcase card featuring high-resolution suite photography, room rate display with currency, descriptive amenity copy, and booking guidance.",
+      "Custom date-range calendar widget allowing start and end date selection, highlighting day 15 as current date, enforcing contiguous single-range booking logic.",
+      "Booking submit button featuring loading spinner animation on click, validation displaying error alert for past-date ranges, success confirmation for valid selections.",
+      "Informational copy describing availability confirmation timeline and personalized concierge follow-up process within 24 hours.",
+      "Room amenities checklist with icon-text pairs showing WiFi connectivity, swimming pool access, spa facilities, and fitness gym availability.",
+      "Guest reviews section aggregating visitor testimonials with numeric ratings (1-5 stars), reviewer names, review publication dates, and sentiment color indicators.",
+      "Sidebar component featuring seasonal promotion packages with descriptive titles, percentage discounts, early-bird booking incentive details, and limited availability notices."
     ]
   },
   {
     "page": "day2",
     "components": [
-      "Settings sidebar highlighting the Notifications section.",
-      "Config card for flag USR_CFG_EMAIL_NOTIF_BOOL_V2 with metadata text.",
-      "Binary toggle switch updating a numeric state indicator.",
-      "Save Changes button with loading state that ends with a simulated fatal exception alert."
+      "Settings sidebar navigation with sections list, currently highlighting and scrolling to the Notifications section with blue background indicator.",
+      "Configuration card displaying the USR_CFG_EMAIL_NOTIF_BOOL_V2 setting flag with label, descriptive metadata text, and current value indicator.",
+      "Binary toggle switch (on/off) that controls the notification boolean state and updates a numeric indicator display reflecting the toggle value.",
+      "Save Changes button with loading spinner animation, ultimately triggering a fatal exception error alert to demonstrate error state handling.",
+      "Email frequency dropdown menu with four frequency tier options (Never, Daily, Weekly, Monthly) allowing users to control notification cadence.",
+      "Expandable notification type list showing distinct notification categories (Promotions, Product Updates, Direct Messages) with independent toggle switches for fine-grained control.",
+      "Theme selection control offering light mode, dark mode, and auto (system-based) options using radio button interface with side-by-side visual mode previews."
     ]
   },
   {
     "page": "day3",
     "components": [
-      "Compose panel with textarea for drafting a post, Save button using Save icon, and alert on successful publish.",
-      "Recent Posts feed listing author name, handle, relative timestamp, and message text for each post.",
-      "New posts prepend instantly to the timeline state."
+      "Compose panel featuring a large textarea for post draft composition with character count, primary Save button with floppy disk icon, success alert on publish.",
+      "Recent Posts chronological feed displaying for each post: author full name, @handle, relative timestamp (e.g., '2h ago'), and post message body text.",
+      "Live feed state management where newly published posts prepend to the top of the timeline immediately without page refresh.",
+      "Interactive engagement controls for each post showing Like button with heart icon and live count, Repost button with retweet icon and live count.",
+      "Auto-complete hashtag suggestion dropdown activated on typing # character in compose field, showing popular hashtags with usage frequency.",
+      "Post visibility dropdown selector with three privacy level options: Public (visible to all), Friends Only (limited to followers), and Private (author only)."
     ]
   },
   {
     "page": "day4",
     "components": [
-      "PortalX nav bar with Help link.",
-      "Onboarding form featuring nickname and user ID fields plus field labels beneath inputs.",
-      "Pre-checked Terms of Service checkbox controlling consent state.",
-      "Register button that alerts success and Cancel button that clears both fields.",
-      "Sign-in prompt link for existing users."
+      "PortalX navigation header bar with right-aligned Help link for accessing documentation and support resources.",
+      "User onboarding form with two primary input fields: nickname field with label above, and user ID field with field validation feedback labels.",
+      "Pre-checked Terms of Service checkbox with associated link text, controlling user consent boolean state required for account registration completion.",
+      "Primary Register button triggering success confirmation alert with user details, and secondary Cancel button clearing both form input fields.",
+      "Text prompt link 'Already have an account?' directing existing users to the sign-in page with underlined styling.",
+      "Profile photo upload component supporting drag-and-drop file input, showing uploaded image preview thumbnail with option to replace selection.",
+      "User biography textarea input field with live character counter display (e.g., '45/500 characters') enforcing maximum 500 character limit.",
+      "Account type selection component offering three tiers (Personal for individuals, Business for organizations, Developer for technical users) with descriptive text for each."
     ]
   },
   {
     "page": "day5",
     "components": [
-      "Header showing StreamPlus branding and signed-in avatar.",
-      "Subscription status card with crown icon, Premium 4K plan title, and stats (next billing date, devices linked).",
-      "Disabled Cancel Subscription link that, after confirmation, surfaces an error banner with lock code.",
-      "Benefit description paragraph outlining plan perks.",
-      "Primary CTA button (Keep My Benefits & Stay Premium) with bounce animation triggering a confirmation alert."
+      "Page header displaying StreamPlus brand logo/wordmark and user's signed-in profile avatar icon in top-right corner.",
+      "Subscription status card with premium crown icon indicator, plan title 'Premium 4K', and key subscription metrics (next billing date, active linked devices count).",
+      "Disabled Cancel Subscription text link with muted styling, triggering confirmation modal that ultimately surfaces error banner displaying technical lock code.",
+      "Multi-line benefit description paragraph detailing subscription plan perks (4K streaming, multi-device access, offline downloads, ad-free experience).",
+      "Prominent primary CTA button labeled 'Keep My Benefits & Stay Premium' with gradient background and bounce animation effect on hover, launching confirmation dialog.",
+      "Comparison matrix table with rows for feature categories (Video Quality, Simultaneous Streams, Offline Downloads) and columns for Standard/Premium tiers showing capability differences.",
+      "Billing history table with columns for invoice date, invoice amount with currency, payment method used, and clickable download PDF receipt links.",
+      "Payment method management selector showing previously saved credit cards with option to add new card, set default, and remove payment methods."
     ]
   },
   {
     "page": "day6",
     "components": [
-      "SkyVault header containing brand badge, centered search bar with icon, and user profile chip.",
-      "Sidebar navigation listing My Files, Shared, Trash with item counts.",
-      "Main panel listing files (icon, name, sync status, date, size) with selectable rows.",
-      "Deprovision Asset button that requires a confirmation dialog then removes the selected file and shows an alert.",
-      "Initial dataset of three files covering doc, image, and sheet types."
+      "SkyVault header bar displaying brand logo badge left-aligned, horizontally centered search input field with magnifying glass icon, user profile chip right-aligned.",
+      "Collapsible sidebar navigation menu with sections: 'My Files' with file count, 'Shared' with shared item count, 'Trash' with deleted item count.",
+      "Main content panel displaying file list as data table rows with columns: file type icon, file name, sync status indicator, last modified date, file size value.",
+      "Bulk action 'Deprovision Asset' button requiring multi-step confirmation dialog, removing selected file from system, and displaying completion alert.",
+      "Initial file dataset containing three sample files: document (.pdf), image (.jpg), and spreadsheet (.xlsx) files for demonstration.",
+      "File upload interaction zone supporting drag-and-drop gesture with visual drop indicator overlay, providing real-time file type validation feedback and size limit warnings.",
+      "Contextual bulk action toolbar appearing above file list when multiple files are selected, showing options: Move to Trash, Download All as ZIP, Share with Team.",
+      "Full-screen file preview modal activated on file click, displaying document/image thumbnail preview, file metadata (size, type, upload date), and sharing permission configuration panel."
     ]
   },
   {
     "page": "day7",
     "components": [
-      "Hero section with pizza photo, overlay badge, and descriptive header text.",
-      "Size Selection list rendered as checkboxes but enforced single-choice; selecting a size resets toppings.",
-      "Topping Selection grid where each button toggles independently, showing a filled dot when active.",
-      "Current Build summary card reflecting chosen size and toppings plus explanatory note about resets.",
-      "Add to Order gradient button that fires a completion alert."
+      "Hero section featuring large appetizing pizza product photography with semi-transparent overlay badge ('Chef's Special'), descriptive header text and subheading.",
+      "Size Selection list displayed with checkbox-style controls (Small, Medium, Large, XL) enforced as single-selection radio group, resetting topping selections on size change.",
+      "Topping Selection grid component with individual topping buttons (Pepperoni, Mushrooms, Onions, etc.) each toggling independently, showing filled circle indicator when active.",
+      "Current Build summary card displaying selected pizza size, complete list of active toppings, total price calculation, with note explaining topping reset on size change.",
+      "Primary 'Add to Order' CTA button with gradient background color, triggering completion confirmation alert and cart addition.",
+      "Dynamic nutritional information panel displaying nutritional values (total calories, protein grams, carbohydrate grams, fat grams) recalculated based on size and topping selections.",
+      "Special instructions textarea input allowing up to 500 character customer notes with live character counter (e.g., 'No onions, extra sauce'), for dietary needs or preferences.",
+      "Delivery time estimate component calculating and displaying estimated prep time (5-10 min), baking time (12-15 min), and total delivery window based on current kitchen order queue."
     ]
   }
 ]
