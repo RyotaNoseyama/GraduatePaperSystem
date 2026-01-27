@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import OpenAI from "openai";
 import { verifyAdminToken } from "@/lib/admin-auth";
-import { buildEvaluationPrompt } from "@/lib/evaluation-prompt";
+import {
+  buildEvaluationPrompt,
+  getPromptTemplateForCond,
+} from "@/lib/evaluation-prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +49,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const templateName = getPromptTemplateForCond(submission.participant?.cond);
     const customPrompt = typeof prompt === "string" ? prompt.trim() : "";
     const hasCustomPrompt = customPrompt.length > 0;
     const systemPrompt = hasCustomPrompt
@@ -53,6 +57,7 @@ export async function POST(request: NextRequest) {
       : await buildEvaluationPrompt({
           taskNumber: submission.taskNumber ?? null,
           workerAnswer: submission.answer,
+          templateName,
         });
     const userMessageContent = submission.answer;
 
@@ -148,11 +153,15 @@ export async function PUT(request: NextRequest) {
     const results = await Promise.all(
       submissions.map(async (submission) => {
         try {
+          const templateName = getPromptTemplateForCond(
+            submission.participant?.cond,
+          );
           const systemPrompt = hasCustomPrompt
             ? customPrompt
             : await buildEvaluationPrompt({
                 taskNumber: submission.taskNumber ?? null,
                 workerAnswer: submission.answer,
+                templateName,
               });
           const userMessageContent = submission.answer;
 

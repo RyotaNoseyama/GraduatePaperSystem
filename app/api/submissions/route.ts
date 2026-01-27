@@ -29,11 +29,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dayIdx = searchParams.get("dayIdx");
     const workerId = searchParams.get("workerId");
+    const condParam = searchParams.get("cond");
 
-    const where: any = {
-      participant: {
-        cond: 1,
-      },
+    const where: Record<string, unknown> = {};
+
+    const defaultCond = 1;
+    let condValue = defaultCond;
+    if (condParam !== null) {
+      const parsedCond = Number.parseInt(condParam, 10);
+      if (!Number.isNaN(parsedCond)) {
+        condValue = parsedCond;
+      }
+    }
+
+    where.participant = {
+      cond: condValue,
     };
     if (dayIdx) {
       where.dayIdx = parseInt(dayIdx);
@@ -200,7 +210,7 @@ export async function POST(request: NextRequest) {
         taskNumber: resolvedTaskNumber,
         answer: trimmedCaption,
         rtMs: rtMs || null,
-        completionCode: "C12BC048", // ここ変更
+        completionCode: "C92OJM9L", // ここ変更
       },
     });
 

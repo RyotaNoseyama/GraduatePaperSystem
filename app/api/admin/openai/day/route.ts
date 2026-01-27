@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import OpenAI from "openai";
 import { verifyAdminToken } from "@/lib/admin-auth";
-import { buildEvaluationPrompt } from "@/lib/evaluation-prompt";
+import {
+  buildEvaluationPrompt,
+  getPromptTemplateForCond,
+} from "@/lib/evaluation-prompt";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +43,9 @@ export async function POST(request: NextRequest) {
       dayIdx: number;
       answer: string;
       taskNumber: number | null;
+      participant: {
+        cond: number | null;
+      } | null;
     };
 
     // 指定日の submissions を取得（必要フィールドだけ select）
@@ -51,6 +57,11 @@ export async function POST(request: NextRequest) {
         dayIdx: true,
         answer: true,
         taskNumber: true,
+        participant: {
+          select: {
+            cond: true,
+          },
+        },
       },
       orderBy: { submittedAt: "desc" },
     });
@@ -70,11 +81,15 @@ export async function POST(request: NextRequest) {
     const results = await Promise.all(
       submissions.map(async (submission) => {
         try {
+          const templateName = getPromptTemplateForCond(
+            submission.participant?.cond,
+          );
           const systemPrompt = hasCustomPrompt
             ? customPrompt
             : await buildEvaluationPrompt({
                 taskNumber: submission.taskNumber ?? null,
                 workerAnswer: submission.answer,
+                templateName,
               });
           const userMessageContent = submission.answer;
 

@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LogOut, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,6 +24,9 @@ interface Submission {
   scoreA: number | null;
   scoreB: number | null;
   submittedAt: string | null;
+  participant?: {
+    cond: number | null;
+  } | null;
 }
 
 type SubmissionProcessResult = {
@@ -27,7 +37,7 @@ type SubmissionProcessResult = {
   error?: string;
 };
 
-type OpenAIResponse = {
+type Cond1OpenAIResponse = {
   is_relevant: boolean;
   scores: {
     theory_breakdown: number[];
@@ -42,6 +52,34 @@ type OpenAIResponse = {
   feedback_title: string;
   feedback_content: string;
 };
+
+type Cond2OpenAIResponse = {
+  is_relevant: boolean;
+  scores: {
+    theory_breakdown: number[];
+    theory_total: number;
+    human_breakdown: {
+      empathy: number;
+      context: number;
+    };
+    human_total: number;
+    grand_total: number;
+  };
+};
+
+type OpenAIResponse = Cond1OpenAIResponse | Cond2OpenAIResponse;
+
+function isCond1Response(
+  response: OpenAIResponse | undefined,
+): response is Cond1OpenAIResponse {
+  return Boolean(response && "feedback_content" in response);
+}
+
+function isCond2Response(
+  response: OpenAIResponse | undefined,
+): response is Cond2OpenAIResponse {
+  return Boolean(response && !("feedback_content" in response));
+}
 
 async function processSubmissionsSequentially(
   submissions: Submission[],
@@ -102,6 +140,7 @@ export default function AdminDashboard() {
   >([]);
   const [isSaving, setIsSaving] = useState(false);
   const [dayIdxFilter, setDayIdxFilter] = useState<string>("");
+  const [condFilter, setCondFilter] = useState<string>("1");
   const pendingSubmissions = submissions.filter(
     (submission) => submission.scoreA === null,
   );
@@ -124,10 +163,21 @@ export default function AdminDashboard() {
     checkAuth();
   }, [router]);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (options?: { cond?: string }) => {
     try {
-      const url = dayIdxFilter
-        ? `/api/submissions?dayIdx=${encodeURIComponent(dayIdxFilter)}`
+      const params = new URLSearchParams();
+      if (dayIdxFilter) {
+        params.append("dayIdx", dayIdxFilter);
+      }
+
+      const condParam = options?.cond ?? condFilter;
+      if (condParam) {
+        params.append("cond", condParam);
+      }
+
+      const queryString = params.toString();
+      const url = queryString
+        ? `/api/submissions?${queryString}`
         : "/api/submissions";
       const response = await fetch(url);
       if (response.ok) {
@@ -143,6 +193,11 @@ export default function AdminDashboard() {
 
   const handleSearchByDay = async () => {
     await fetchSubmissions();
+  };
+
+  const handleCondFilterChange = (value: string) => {
+    setCondFilter(value);
+    fetchSubmissions({ cond: value });
   };
 
   const toggleSubmissionSelection = (submissionId: string) => {
@@ -218,19 +273,59 @@ export default function AdminDashboard() {
     try {
       let savedCount = 0;
       let failedCount = 0;
+      const submissionMap = new Map(
+        submissions.map((submission) => [submission.id, submission]),
+      );
 
       for (const result of processResults) {
         if (result.success && result.parsedResponse) {
+          const targetSubmission = submissionMap.get(result.submissionId);
+          if (!targetSubmission) {
+            failedCount++;
+            continue;
+          }
+
+          const participantCond = targetSubmission.participant?.cond ?? 1;
+          const isCondTwo = participantCond === 2;
+
+          let payload: {
+            submissionId: string;
+            scoreA: number;
+            scoreB: number;
+            feedback: string | null;
+          };
+
+          if (isCondTwo) {
+            if (!isCond2Response(result.parsedResponse)) {
+              failedCount++;
+              continue;
+            }
+
+            payload = {
+              submissionId: result.submissionId,
+              scoreA: result.parsedResponse.scores.theory_total,
+              scoreB: result.parsedResponse.scores.human_total,
+              feedback: null,
+            };
+          } else {
+            if (!isCond1Response(result.parsedResponse)) {
+              failedCount++;
+              continue;
+            }
+
+            payload = {
+              submissionId: result.submissionId,
+              scoreA: result.parsedResponse.scores.theory_total,
+              scoreB: result.parsedResponse.scores.human_total,
+              feedback: result.parsedResponse.feedback_content,
+            };
+          }
+
           try {
             const response = await fetch("/api/admin/submissions/update", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                submissionId: result.submissionId,
-                scoreA: result.parsedResponse.scores.theory_total,
-                scoreB: result.parsedResponse.scores.human_total,
-                feedback: result.parsedResponse.feedback_content,
-              }),
+              body: JSON.stringify(payload),
             });
 
             if (response.ok) {
@@ -345,6 +440,23 @@ export default function AdminDashboard() {
                     onChange={(e) => setDayIdxFilter(e.target.value)}
                     placeholder="例: 1"
                   />
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Condition (cond)
+                  </label>
+                  <Select
+                    value={condFilter}
+                    onValueChange={handleCondFilterChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select cond" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">cond = 1</SelectItem>
+                      <SelectItem value="2">cond = 2</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={handleSearchByDay}>

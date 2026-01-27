@@ -10,9 +10,15 @@ type IntendedIssuesRecord = Record<
   { visual_issue: string; functional_issue: string }
 >;
 
-const PROMPT_PATH = path.join(process.cwd(), "data", "prompt.md");
+const PROMPT_TEMPLATE_PATHS = {
+  prompt: path.join(process.cwd(), "data", "prompt.md"),
+  prompt2: path.join(process.cwd(), "data", "prompt2.md"),
+} as const;
+
+export type PromptTemplateName = keyof typeof PROMPT_TEMPLATE_PATHS;
+
 const intendedIssuesMap = intendedIssues as IntendedIssuesRecord;
-let cachedTemplate: string | null = null;
+const templateCache: Partial<Record<PromptTemplateName, string>> = {};
 
 const websiteComponentsByTaskNumber: Record<number, string[]> = (() => {
   const map: Record<number, string[]> = {};
@@ -32,13 +38,20 @@ const websiteComponentsByTaskNumber: Record<number, string[]> = (() => {
   return map;
 })();
 
-async function loadPromptTemplate(): Promise<string> {
-  if (cachedTemplate) {
-    return cachedTemplate;
+async function loadPromptTemplate(
+  templateName: PromptTemplateName = "prompt",
+): Promise<string> {
+  const cached = templateCache[templateName];
+  if (cached) {
+    return cached;
   }
 
-  cachedTemplate = await fs.readFile(PROMPT_PATH, "utf-8");
-  return cachedTemplate;
+  const template = await fs.readFile(
+    PROMPT_TEMPLATE_PATHS[templateName],
+    "utf-8",
+  );
+  templateCache[templateName] = template;
+  return template;
 }
 
 function formatList(items: string[], fallback: string): string {
@@ -74,8 +87,9 @@ function getIntendedIssues(taskNumber?: number | null): string[] {
 export async function buildEvaluationPrompt(params: {
   taskNumber?: number | null;
   workerAnswer: string;
+  templateName?: PromptTemplateName;
 }): Promise<string> {
-  const template = await loadPromptTemplate();
+  const template = await loadPromptTemplate(params.templateName ?? "prompt");
   const websiteComponentsList = getWebsiteComponents(params.taskNumber);
   const intendedIssuesList = getIntendedIssues(params.taskNumber);
 
@@ -94,4 +108,10 @@ export async function buildEvaluationPrompt(params: {
     .replaceAll("{website_components}", websiteComponentsText)
     .replaceAll("{intended_issues}", intendedIssuesText)
     .replaceAll("{worker_answer}", workerAnswerText);
+}
+
+export function getPromptTemplateForCond(
+  cond?: number | null,
+): PromptTemplateName {
+  return cond === 2 ? "prompt2" : "prompt";
 }
