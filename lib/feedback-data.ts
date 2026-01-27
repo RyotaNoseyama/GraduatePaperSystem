@@ -224,7 +224,7 @@ export async function getPreviousSubmission(
     return { nextTaskNumber };
   }
 
-  const submission = await prisma.submission.findUnique({
+  let submission = await prisma.submission.findUnique({
     where: {
       workerId_dayIdx: {
         workerId,
@@ -241,11 +241,32 @@ export async function getPreviousSubmission(
   });
 
   if (!submission) {
+    submission = await prisma.submission.findFirst({
+      where: {
+        workerId,
+        dayIdx: {
+          lt: todayIdx,
+        },
+      },
+      orderBy: {
+        dayIdx: "desc",
+      },
+      select: {
+        feedback: true,
+        scoreA: true,
+        scoreB: true,
+        dayIdx: true,
+        taskNumber: true,
+      },
+    });
+  }
+
+  if (!submission) {
     console.log(
       "No previous submission found for",
       workerId,
-      "at",
-      yesterdayIdx,
+      "before",
+      todayIdx,
     );
     return { nextTaskNumber };
   }
