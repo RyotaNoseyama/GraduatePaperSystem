@@ -210,7 +210,7 @@ export async function POST(request: NextRequest) {
         taskNumber: resolvedTaskNumber,
         answer: trimmedCaption,
         rtMs: rtMs || null,
-        completionCode: "C1BEQCOI", // ここ変更
+        completionCode: "CWALKEI0", // ここ変更
       },
     });
 
