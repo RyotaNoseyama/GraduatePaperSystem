@@ -59,7 +59,7 @@ export function getCurrentDayIdx(): number {
   const daysSinceEpoch = Math.floor(
     etMidnight.getTime() / (24 * 60 * 60 * 1000),
   );
-  return 4;
+  return 5;
 }
 
 export function generateCompletionCode(): string {
