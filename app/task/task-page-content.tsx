@@ -189,7 +189,7 @@ export function TaskPageContent() {
                 Your completion code:
               </p>
               <p className="text-xl font-mono font-bold text-slate-900">
-                {sessionId ? "CJA1L1U1" : completionCode} {/* ここ変更 */}
+                {sessionId ? "CTPMWIQO" : completionCode} {/* ここ変更 */}
               </p>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">
