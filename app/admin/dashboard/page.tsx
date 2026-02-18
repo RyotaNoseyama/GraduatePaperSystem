@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -128,7 +127,6 @@ async function processSubmissionsSequentially(
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [adminId, setAdminId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubmissions, setSelectedSubmissions] = useState<string[]>([]);
@@ -208,50 +206,6 @@ export default function AdminDashboard() {
     );
   };
 
-  const handleSendDayToOpenAI = async () => {
-    if (!dayIdxFilter) {
-      toast.error("dayIdx を入力してください");
-      return;
-    }
-
-    setIsProcessing(true);
-    setAiResponse("");
-
-    try {
-      const response = await fetch("/api/admin/openai/day", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          dayIdx: Number(dayIdxFilter),
-          prompt: customPrompt || undefined,
-        }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        toast.success(
-          `dayIdx=${dayIdxFilter} を処理しました: ${data.totalProcessed}件`,
-        );
-        setAiResponse(
-          Array.isArray(data.results)
-            ? data.results
-                .map(
-                  (r: any, i: number) =>
-                    `#${i + 1} ${r.success ? "OK" : "NG"} (${r.workerId})\n${r.openaiResponse || r.error || ""}`,
-                )
-                .join("\n\n")
-            : "",
-        );
-      } else {
-        toast.error(data.error || "処理に失敗しました");
-      }
-    } catch (error) {
-      console.error("OpenAI API day-batch error:", error);
-      toast.error("OpenAI API（一括）の呼び出しに失敗しました");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -462,22 +416,6 @@ export default function AdminDashboard() {
                   <Button variant="outline" onClick={handleSearchByDay}>
                     検索
                   </Button>
-                  {/* <Button
-                    onClick={handleSendDayToOpenAI}
-                    disabled={!dayIdxFilter || isProcessing}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        送信中...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2 h-4 w-4" />
-                        この日のSubmissionを一括送信
-                      </>
-                    )}
-                  </Button> */}
                 </div>
               </div>
             </CardContent>
@@ -634,17 +572,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    カスタムプロンプト（オプション）
-                  </label>
-                  <Textarea
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    placeholder="デフォルト: 以下の回答を評価してください。回答の質、明確さ、完成度を1-10のスケールで評価し、改善点を提案してください。"
-                    rows={4}
-                  />
-                </div> */}
 
                 <div className="space-y-2">
                   <Button

@@ -8,7 +8,7 @@ import { Loading } from "@/components/task/loading";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle, ArrowLeft } from "lucide-react";
-import { GroupInfo, getGroupMessage } from "@/lib/group-utils";
+import { GroupInfo } from "@/lib/group-utils";
 import { Button } from "@/components/ui/button";
 
 export function TaskPageContent() {
@@ -21,7 +21,6 @@ export function TaskPageContent() {
     : null;
   const [completionCode, setCompletionCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
   const [taskNumber, setTaskNumber] = useState<number | null>(nextTaskNumber);
@@ -54,8 +53,6 @@ export function TaskPageContent() {
   //   };
   //   fetchTaskNumber();
   // }, [workerId, taskNumber]);
-
-  console.log(taskNumber);
 
   useEffect(() => {
     if (hasLoggedAccess) return;
@@ -95,7 +92,6 @@ export function TaskPageContent() {
     selectedTaskNumber: number,
   ) => {
     setError(null);
-    setWarning(null);
     try {
       // FBページ（/task）の滞在時間をクエリパラメータから取得
       const feedbackTimeMs = searchParams.get("feedbackTimeMs");
@@ -127,11 +123,6 @@ export function TaskPageContent() {
       }
 
       // 類似度が高い場合の警告（コードは発行される）
-      if (data.isSimilar) {
-        setWarning(
-          "Your submission was flagged as similar to existing submissions, but has been recorded.",
-        );
-      }
 
       setCompletionCode(data.completionCode);
       setHasSubmitted(true);
@@ -160,8 +151,6 @@ export function TaskPageContent() {
   }
 
   if (hasSubmitted && completionCode) {
-    const groupMessage = groupInfo ? getGroupMessage(groupInfo!) : null;
-
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <Card className="max-w-md border-green-200 bg-green-50">
@@ -173,16 +162,6 @@ export function TaskPageContent() {
             <p className="text-slate-700 leading-relaxed">
               Your caption has been submitted successfully.
             </p>
-
-            {/* 類似度警告 */}
-            {/* {warning && (
-              <Alert className="border-amber-200 bg-amber-50">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
-                <AlertDescription className="text-amber-900">
-                  {warning}
-                </AlertDescription>
-              </Alert>
-            )} */}
 
             <div className="bg-white border border-slate-200 rounded-lg p-4">
               <p className="text-sm text-slate-600 mb-2">
